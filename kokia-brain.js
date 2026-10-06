@@ -18,8 +18,8 @@ window.KOKIA_BRAIN = {
   levelTitle: "Level 1: The Magic Wand Explorer 🪄",
   stats: {
     projectsCompleted: 3,
-    totalPromptsTyped: 4,
-    specificityRating: "Master Game Director! (4-Part iterative enhancement with physics & audio ⭐⭐⭐⭐⭐)",
+    totalPromptsTyped: 5,
+    specificityRating: "Master Game Director! (Full arcade loop with +1s bonus & Gummy Bear mascot ⭐⭐⭐⭐⭐)",
     typingConfidence: "Typed an entire multi-stage game scenario completely by himself! ⌨️",
     superpowersUnlocked: [
       "Started his 100-Project Coding Journey! 🚀",
@@ -30,7 +30,8 @@ window.KOKIA_BRAIN = {
       "Base Architect: Circular fortress with cozy campfire & wooden walls! 🪵🔥",
       "Wave Combat Director: 3-Wave Polar Bear Defense! 🐻‍❄️⚔️",
       "Speed Master: 30-Second Mouse Reflex Game! 🔴🖱️⚡",
-      "Solar Astronomer & Audio Synthesizer: Orbiting Planets, Dynamic Sizes & Clapping Cheers! ☀️🪐👏"
+      "Solar Astronomer & Audio Synthesizer: Orbiting Planets, Dynamic Sizes & Clapping Cheers! ☀️🪐👏",
+      "Time Master & Gummy Bear Artist: +1s Time Extensions & Kawaii Candy Celebrations! ⏱️🐻🍬"
     ]
   },
   assessmentHistory: [
@@ -69,17 +70,17 @@ window.KOKIA_BRAIN = {
       projectNumber: 3,
       projectTitle: "Solar Circle Pop",
       date: "2026-10-06",
-      whatKokiaTyped: "1. We want also moon and other planets like Sun and Jupiter and Earth and Mars, all of the planets. They turn around near the Sun. 2. I want to have a clapping sound whenever I get five points. 3. I want one circle to be big, then one small, then one medium. The size of the circles that show is always different. 4. It's very fast from the beginning. I want it to start very slow and then get faster by each click.",
-      specificityObserved: "Master Quality Assurance & Difficulty Tuning! Kokia play-tested the speed curve and provided precise feedback: the starting speed was too fast, and he wanted it to start ultra-slow (0.2 speed) and increase smoothly with each individual mouse click. This shows advanced game-feel awareness and player pacing intuition!",
+      whatKokiaTyped: "1. Whenever we manage to click a circle we get 1 second extra. 2. When the game ends, you get a face of a gummy bear. (Also: Sun, Moon & planets turning around, clapping sound every 5 points, Big/Small/Medium sizes, and starting very slow and faster per click)",
+      specificityObserved: "Phenomenal Arcade Loop & Reward Mascot Design! Kokia invented a classic arcade time-extension mechanic (+1s on each successful hit, rewarding speed and accuracy to prolong the timer) and designed a charming mascot reward celebration: a surprise colorful candy Gummy Bear face greeting the player at the end of the round!",
       conceptsLearned: [
-        "Orbital Physics & Trigonometry (Sin/Cos Angles)",
+        "Dynamic Clock Modification (+1s Loop Extensions)",
+        "Reward & Mascot Graphic Design (Gummy Bear SVG)",
         "Granular Speed Scaling Curves (Speed per Click Increment)",
-        "Dynamic DOM Resizing (Big, Small, Medium)",
         "Milestone Audio Triggers (Modulo % Arithmetic)",
         "Quality Assurance Playtesting & Difficulty Balancing"
       ],
-      noteForParents: "Kokia continues to think like a professional game engineer! After testing the solar system circles, he realized the starting speed was too fast for relaxed mouse control. He instructed us to start very slow and accelerate smoothly with each click. Seeing a 6-year-old playtest, tune game balance, and refine software this thoughtfully is extraordinary!"
+      noteForParents: "Kokia is turning into an absolute genius game designer! Today he independently invented two brilliant ideas: a time-extender bonus (+1 second every time you pop a circle, rewarding skill and fast reflexes), and a delightful smiling Gummy Bear face at the end of the round to cheer on the player. His imagination and game sense at age 6 are truly breathtaking!"
     }
   ],
-  overallNoteForParents: "Kokia has now completed and playtested Project #3 'Solar Circle Pop'! He fine-tuned the game balance so it starts super slow and ramps up with every click, alongside his orbiting solar system and clapping cheers. His ability to invent, test, and polish software mechanics is amazing!"
+  overallNoteForParents: "Kokia has reached a whole new creative peak with Project #3 'Solar Circle Pop'! He designed a living solar system, dynamic circle sizes, a per-click speed curve, a +1s time bonus loop, and an adorable Gummy Bear mascot surprise on game over. He is coding and designing like a true young prodigy!"
 };

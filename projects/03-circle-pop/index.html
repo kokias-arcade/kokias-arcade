@@ -2,8 +2,12 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>🪐 Kokia's Solar Circle Pop! (30s Challenge)</title>
+  <!-- Google Fonts for arcade typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -14,10 +18,11 @@
     }
 
     body {
-      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka', 'Segoe UI', cursive, sans-serif;
+      font-family: 'Fredoka', 'Nunito', 'Comic Sans MS', 'Chalkboard SE', cursive, sans-serif;
       background: #000000;
       color: #ffffff;
-      min-height: 100vh;
+      height: 100vh;
+      height: 100dvh;
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -92,6 +97,7 @@
     }
 
     /* Main Game Container */
+    /* Main Game Container - completely below HUD */
     #gameArea {
       flex: 1;
       width: 100%;
@@ -100,6 +106,8 @@
       position: relative;
       overflow: hidden;
       cursor: crosshair;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     /* Solar System & Stars Canvas */
@@ -113,45 +121,40 @@
       z-index: 2;
     }
 
-    /* HUD Bar during gameplay */
-    .hud-overlay {
-      position: absolute;
-      top: 15px;
-      left: 50%;
-      transform: translateX(-50%);
+    /* Dedicated Top HUD Bar - placed above playfield so circles NEVER go behind it! */
+    .hud-bar {
+      width: 100%;
+      background: linear-gradient(180deg, #101222 0%, #0a0b16 100%);
+      border-bottom: 2px solid #23273e;
       display: flex;
       align-items: center;
-      gap: 16px;
-      background: rgba(14, 14, 24, 0.88);
-      border: 2px solid #2e2e48;
-      padding: 8px 24px;
-      border-radius: 50px;
-      z-index: 40;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.8), 0 0 15px rgba(255,255,255,0.05);
-      backdrop-filter: blur(8px);
-      transition: all 0.3s ease;
+      justify-content: space-around;
+      padding: 8px 16px;
+      z-index: 45;
+      flex-shrink: 0;
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.7);
     }
 
     .hud-item {
       display: flex;
       align-items: center;
       gap: 8px;
-      font-size: 1.1rem;
+      font-size: 1.05rem;
       font-weight: bold;
     }
 
     .hud-label {
       color: #a4b0be;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.8px;
     }
 
     .hud-value {
-      font-size: 1.5rem;
+      font-size: 1.45rem;
       font-weight: 900;
       color: #ffffff;
-      min-width: 40px;
+      min-width: 32px;
     }
 
     #timerValue {
@@ -182,7 +185,7 @@
       gap: 6px;
       padding: 4px 12px;
       border-radius: 20px;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       font-weight: 800;
       background: rgba(46, 213, 115, 0.2);
       border: 1px solid #2ed573;
@@ -217,7 +220,7 @@
       100% { transform: translate(1px, 2px) rotate(-1deg); }
     }
 
-    /* The interactive circle */
+    /* The interactive circle with expanded touch hit target for children's fingers */
     .game-circle {
       position: absolute;
       border-radius: 50%;
@@ -229,7 +232,19 @@
       transform: translate(-50%, -50%);
       box-shadow: 0 0 30px var(--glow-color, #ff4757), inset 0 0 15px rgba(255,255,255,0.7);
       transition: box-shadow 0.1s;
-      touch-action: manipulation;
+      touch-action: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Invisible touch padding expansion (32px larger hit area) */
+    .game-circle::before {
+      content: '';
+      position: absolute;
+      top: -16px;
+      left: -16px;
+      right: -16px;
+      bottom: -16px;
+      border-radius: 50%;
     }
 
     .game-circle:active {
@@ -621,6 +636,56 @@
       pointer-events: none;
       z-index: 150;
     }
+
+    /* Mobile Phone & iPad Optimizations */
+    @media (max-width: 600px) {
+      header {
+        padding: 8px 12px;
+      }
+      .back-btn {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+      }
+      .header-title {
+        font-size: 1.05rem;
+      }
+      .sound-btn {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+      }
+      .hud-bar {
+        padding: 6px 8px;
+        gap: 6px;
+      }
+      .hud-item {
+        gap: 4px;
+        font-size: 0.95rem;
+      }
+      .hud-label {
+        font-size: 0.72rem;
+      }
+      .hud-value {
+        font-size: 1.25rem;
+        min-width: unset;
+      }
+      #speedBadge {
+        padding: 3px 8px;
+        font-size: 0.78rem;
+      }
+      .modal-card {
+        padding: 24px 20px;
+        border-radius: 26px;
+      }
+      .modal-title {
+        font-size: 1.6rem;
+      }
+      .btn-play {
+        padding: 12px 30px;
+        font-size: 1.25rem;
+        width: 100%;
+        justify-content: center;
+      }
+    }
   </style>
 </head>
 <body>
@@ -628,15 +693,35 @@
   <!-- Top Navigation Bar -->
   <header>
     <a href="../../index.html" class="back-btn" id="arcadeBackBtn">
-      ⬅️ Back to Arcade
+      ⬅️ Arcade
     </a>
     <div class="header-title">
-      🪐 Kokia's Solar Circle Pop!
+      🪐 Kokia's Solar Pop!
     </div>
     <div class="header-actions">
       <button class="sound-btn" id="soundToggleBtn">🔊 Sound: ON</button>
     </div>
   </header>
+
+  <!-- Dedicated Top HUD Bar - ALWAYS ABOVE the game field, circles never hide behind it! -->
+  <div class="hud-bar" id="hudBar">
+    <div class="hud-item">
+      <span class="hud-label">⏱️ Time</span>
+      <span class="hud-value" id="timerValue">30s</span>
+    </div>
+    <div class="hud-item" style="border-left: 2px solid #2e2e48; padding-left: 12px;">
+      <span class="hud-label">⭐ Score</span>
+      <span class="hud-value" id="scoreValue">0</span>
+    </div>
+    <div class="hud-item" style="border-left: 2px solid #2e2e48; padding-left: 12px;">
+      <span class="hud-label">⚡ Speed</span>
+      <span id="speedBadge">🟢 Slow</span>
+    </div>
+    <div class="hud-item" style="border-left: 2px solid #2e2e48; padding-left: 12px;">
+      <span class="hud-label">🔥 Combo</span>
+      <span class="hud-value" id="streakValue" style="color:#feca57;">0</span>
+    </div>
+  </div>
 
   <!-- Interactive Game Area with Black Space Background -->
   <div id="gameArea">
@@ -648,26 +733,6 @@
 
     <!-- Confetti canvas on game over -->
     <canvas id="confettiCanvas"></canvas>
-
-    <!-- HUD Overlay during game -->
-    <div class="hud-overlay" id="hudBar">
-      <div class="hud-item">
-        <span class="hud-label">⏱️ Time</span>
-        <span class="hud-value" id="timerValue">30s</span>
-      </div>
-      <div class="hud-item" style="border-left: 2px solid #2e2e48; padding-left: 16px;">
-        <span class="hud-label">⭐ Score</span>
-        <span class="hud-value" id="scoreValue">0</span>
-      </div>
-      <div class="hud-item" style="border-left: 2px solid #2e2e48; padding-left: 16px;">
-        <span class="hud-label">⚡ Speed</span>
-        <span id="speedBadge">🟢 Slow</span>
-      </div>
-      <div class="hud-item" style="border-left: 2px solid #2e2e48; padding-left: 16px;">
-        <span class="hud-label">🔥 Combo</span>
-        <span class="hud-value" id="streakValue" style="color:#feca57; font-size:1.3rem;">0</span>
-      </div>
-    </div>
 
     <!-- Active Moving Circle Container -->
     <div id="circleContainer"></div>
@@ -1394,14 +1459,15 @@
         speedBadgeEl.textContent = speedConfig.label;
       }
 
-      // Safe bounds
+      // Safe bounds within the dedicated game area (HUD is now above, outside gameArea!)
       const areaW = gameArea.clientWidth;
       const areaH = gameArea.clientHeight;
 
-      const minX = size / 2 + 25;
-      const maxX = areaW - size / 2 - 25;
-      const minY = size / 2 + 85; // below top HUD
-      const maxY = areaH - size / 2 - 25;
+      const pad = Math.floor(size / 2) + 16;
+      const minX = pad;
+      const maxX = Math.max(minX + 20, areaW - pad);
+      const minY = pad;
+      const maxY = Math.max(minY + 20, areaH - pad);
 
       const x = Math.floor(Math.random() * (maxX - minX)) + minX;
       const y = Math.floor(Math.random() * (maxY - minY)) + minY;
