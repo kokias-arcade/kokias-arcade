@@ -476,6 +476,60 @@
       100% { transform: translate(-50%, -120px) scale(1); opacity: 0; }
     }
 
+    /* Floating +1s Time Bonus when circle is clicked */
+    .floating-time-bonus {
+      position: absolute;
+      color: #2ed573;
+      font-size: 1.6rem;
+      font-weight: 900;
+      pointer-events: none;
+      transform: translate(-50%, -50%);
+      animation: floatTime 0.75s ease-out forwards;
+      z-index: 65;
+      text-shadow: 0 0 14px #2ed573, 0 2px 5px rgba(0,0,0,0.9);
+    }
+
+    @keyframes floatTime {
+      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
+      50% { transform: translate(-50%, -60px) scale(1.3); opacity: 1; }
+      100% { transform: translate(-50%, -90px) scale(1); opacity: 0; }
+    }
+
+    /* Gummy Bear Face on Game Over */
+    .gummy-bear-card {
+      margin: 10px auto 14px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .gummy-bear-svg {
+      width: 145px;
+      height: 145px;
+      animation: gummyBounce 2s ease-in-out infinite alternate;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .gummy-bear-svg:hover {
+      transform: scale(1.1) rotate(4deg);
+    }
+
+    @keyframes gummyBounce {
+      0% { transform: translateY(0) scale(1, 1); }
+      50% { transform: translateY(-7px) scale(0.97, 1.03); }
+      100% { transform: translateY(0) scale(1.03, 0.97); }
+    }
+
+    .gummy-bear-title {
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #ff9ff3;
+      margin-top: 6px;
+      text-shadow: 0 0 10px rgba(255, 159, 243, 0.6);
+    }
+
     /* 5-Points Clapping Celebration Banner */
     .clap-banner {
       position: absolute;
@@ -647,6 +701,14 @@
             <span class="step-icon">👏</span>
             <span>Listen for the <strong>CLAPPING CHEER</strong> every <strong>5 points</strong>!</span>
           </div>
+          <div class="step-item">
+            <span class="step-icon">⏱️✨</span>
+            <span>Every circle gives you <strong>+1 SECOND EXTRA TIME</strong>!</span>
+          </div>
+          <div class="step-item">
+            <span class="step-icon">🐻🍬</span>
+            <span>When time runs out, see your surprise <strong>GUMMY BEAR FACE</strong>!</span>
+          </div>
         </div>
 
         <button class="btn-play" id="startBtn">
@@ -659,6 +721,13 @@
     <div class="screen-overlay hidden" id="gameOverScreen">
       <div class="modal-card" style="border-color: #00d2d3; box-shadow: 0 0 50px rgba(0, 210, 211, 0.35);">
         <span class="modal-badge" style="background: #00d2d3; color: #14141e;">⏱️ TIME'S UP!</span>
+        
+        <!-- CUTE GUMMY BEAR FACE (Kokia's Request!) -->
+        <div class="gummy-bear-card">
+          <div id="gummyBearContainer"></div>
+          <div class="gummy-bear-title" id="gummyBearTitle">🐻 Gummy Bear Friend!</div>
+        </div>
+
         <h1 class="modal-title" style="background: linear-gradient(135deg, #00d2d3, #2ed573, #feca57); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Incredible Clicks, Kokia!</h1>
         
         <div class="score-banner">
@@ -1392,6 +1461,33 @@
         scoreValueEl.style.transform = 'scale(1.35)';
         setTimeout(() => { scoreValueEl.style.transform = 'scale(1)'; }, 150);
 
+        // KOKIA'S RULE #1: +1 SECOND EXTRA TIME ON EVERY CIRCLE! ⏱️✨
+        timeLeft += 1;
+        timerValueEl.textContent = `${timeLeft}s`;
+
+        // Pulse timer in green
+        timerValueEl.style.transform = 'scale(1.3)';
+        timerValueEl.style.color = '#2ed573';
+        setTimeout(() => {
+          timerValueEl.style.transform = 'scale(1)';
+          if (timeLeft <= 5) {
+            timerValueEl.className = 'hud-value danger';
+          } else if (timeLeft <= 10) {
+            timerValueEl.className = 'hud-value hurry';
+          } else {
+            timerValueEl.className = 'hud-value';
+          }
+        }, 220);
+
+        // Floating "+1s ⏱️" text
+        const timeBonusEl = document.createElement('div');
+        timeBonusEl.className = 'floating-time-bonus';
+        timeBonusEl.style.left = `${activeCircle.x + 35}px`;
+        timeBonusEl.style.top = `${activeCircle.y - 25}px`;
+        timeBonusEl.innerHTML = `+1s ⏱️`;
+        gameArea.appendChild(timeBonusEl);
+        setTimeout(() => { timeBonusEl.remove(); }, 750);
+
         // Sound effect
         playPopSound(streak);
 
@@ -1533,6 +1629,84 @@
       }, 1000);
     }
 
+    /* =========================================================================
+       GUMMY BEAR FACE GENERATOR (Kokia's Game Over Surprise! 🐻🍬)
+       ========================================================================= */
+    const gummyFlavors = [
+      { name: '🍓 Cherry Sweet Gummy Bear', main: '#ff4757', light: '#ff6b81', dark: '#b33939', cheek: '#ff7979', glow: 'rgba(255, 71, 87, 0.7)' },
+      { name: '🍏 Green Apple Gummy Bear', main: '#2ed573', light: '#7bed9f', dark: '#1e8449', cheek: '#a8e6cf', glow: 'rgba(46, 213, 115, 0.7)' },
+      { name: '🍍 Golden Pineapple Gummy Bear', main: '#feca57', light: '#ffefa1', dark: '#d35400', cheek: '#ffeaa7', glow: 'rgba(254, 202, 87, 0.7)' },
+      { name: '🫐 Blue Raspberry Gummy Bear', main: '#00d2d3', light: '#70a1ff', dark: '#0984e3', cheek: '#c7ecee', glow: 'rgba(0, 210, 211, 0.7)' },
+      { name: '🍇 Grape Jelly Gummy Bear', main: '#9b59b6', light: '#d980fa', dark: '#6c5ce7', cheek: '#e056fd', glow: 'rgba(155, 89, 182, 0.7)' }
+    ];
+
+    function renderGummyBearFace() {
+      const flavor = gummyFlavors[Math.floor(Math.random() * gummyFlavors.length)];
+      const container = document.getElementById('gummyBearContainer');
+      const title = document.getElementById('gummyBearTitle');
+      if (!container) return;
+
+      title.textContent = `${flavor.name}! 🐻🍬`;
+      title.style.color = flavor.light;
+
+      container.innerHTML = `
+        <svg class="gummy-bear-svg" viewBox="0 0 200 200" style="filter: drop-shadow(0 8px 25px ${flavor.glow});">
+          <defs>
+            <radialGradient id="gummyGrad" cx="35%" cy="30%" r="70%">
+              <stop offset="0%" stop-color="${flavor.light}" />
+              <stop offset="60%" stop-color="${flavor.main}" />
+              <stop offset="100%" stop-color="${flavor.dark}" />
+            </radialGradient>
+            <radialGradient id="earInnerGrad" cx="40%" cy="40%" r="60%">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity="0.45" />
+              <stop offset="100%" stop-color="${flavor.dark}" stop-opacity="0.6" />
+            </radialGradient>
+          </defs>
+
+          <!-- Left Ear -->
+          <circle cx="50" cy="50" r="30" fill="url(#gummyGrad)" />
+          <circle cx="50" cy="50" r="17" fill="url(#earInnerGrad)" />
+          <ellipse cx="44" cy="42" rx="9" ry="5" fill="#ffffff" opacity="0.65" transform="rotate(-30 44 42)" />
+
+          <!-- Right Ear -->
+          <circle cx="150" cy="50" r="30" fill="url(#gummyGrad)" />
+          <circle cx="150" cy="50" r="17" fill="url(#earInnerGrad)" />
+          <ellipse cx="144" cy="42" rx="9" ry="5" fill="#ffffff" opacity="0.65" transform="rotate(-30 144 42)" />
+
+          <!-- Cute Gummy Head -->
+          <circle cx="100" cy="112" r="70" fill="url(#gummyGrad)" />
+
+          <!-- Rosy Cheeks -->
+          <ellipse cx="58" cy="132" rx="16" ry="10" fill="${flavor.cheek}" opacity="0.65" />
+          <ellipse cx="142" cy="132" rx="16" ry="10" fill="${flavor.cheek}" opacity="0.65" />
+
+          <!-- Muzzle / Snout -->
+          <ellipse cx="100" cy="128" rx="34" ry="26" fill="${flavor.light}" opacity="0.85" />
+          <!-- Heart-shaped/Oval Gummy Nose -->
+          <ellipse cx="100" cy="116" rx="14" ry="9" fill="#2d3436" />
+          <ellipse cx="96" cy="114" rx="4" ry="2.5" fill="#ffffff" opacity="0.9" />
+
+          <!-- Happy Smiling Mouth with Tongue -->
+          <path d="M 88 128 Q 100 144 112 128" stroke="#2d3436" stroke-width="4.5" fill="none" stroke-linecap="round" />
+          <path d="M 93 131 Q 100 145 107 131 Z" fill="#ff4757" />
+
+          <!-- Big Kawaii Cartoon Eyes -->
+          <circle cx="70" cy="94" r="12" fill="#2d3436" />
+          <circle cx="66" cy="90" r="5" fill="#ffffff" />
+          <circle cx="73" cy="98" r="2.5" fill="#ffffff" />
+
+          <circle cx="130" cy="94" r="12" fill="#2d3436" />
+          <circle cx="126" cy="90" r="5" fill="#ffffff" />
+          <circle cx="133" cy="98" r="2.5" fill="#ffffff" />
+
+          <!-- Forehead Candy Gelatin Shine Highlights -->
+          <ellipse cx="78" cy="74" rx="18" ry="8" fill="#ffffff" opacity="0.6" transform="rotate(-15 78 74)" />
+          <ellipse cx="122" cy="74" rx="12" ry="6" fill="#ffffff" opacity="0.45" transform="rotate(15 122 74)" />
+          <circle cx="95" cy="65" r="4" fill="#ffffff" opacity="0.6" />
+        </svg>
+      `;
+    }
+
     function endGame() {
       clearInterval(gameTimer);
       if (circleAnimFrame) cancelAnimationFrame(circleAnimFrame);
@@ -1551,6 +1725,9 @@
 
       // Display Final Score
       finalScoreValEl.textContent = score;
+
+      // Render Kokia's surprise Gummy Bear face!
+      renderGummyBearFace();
 
       // Assign fun kid rank based on score
       if (score >= 35) {

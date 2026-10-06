@@ -89,7 +89,7 @@ window.KOKIA_PROJECTS = [
     emoji: "🪐",
     color: "#00d2d3",
     folder: "projects/03-circle-pop/index.html",
-    description: "Zoom through space as the Sun, Moon, and 8 planets turn around! Catch glowing circles that change from Big to Small to Medium, speed up from Slow to Fast, and cheer with clapping every 5 points!",
+    description: "Zoom through space as the Sun, Moon, and 8 planets turn around! Catch circles that give +1s extra time, change sizes, accelerate with each click, cheer with clapping, and reveal a cute surprise Gummy Bear face at game over!",
     howItWasBuilt: [
       {
         step: 1,
@@ -113,8 +113,8 @@ window.KOKIA_PROJECTS = [
       },
       {
         step: 5,
-        title: "5-Point Clapping Cheers & High Scores 👏🏆",
-        text: "We synthesized a crowd clapping and cheering sound every time Kokia reaches 5 points (5, 10, 15, 20...), plus confetti and a trophy card when the 30 seconds finish!"
+        title: "+1s Extra Time & The Surprise Gummy Bear! ⏱️🐻🍬",
+        text: "Kokia added two genius features: every circle you pop adds +1 second extra time to the clock, and when the game finishes, a shiny, colorful candy Gummy Bear face smiles and celebrates your score!"
       }
     ]
   }
