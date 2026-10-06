@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🛡️ Defend the Base</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka', 'Segoe UI', cursive, sans-serif;
+      background: #e8f4f8;
+      color: #2c3e50;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow-x: hidden;
+    }
+
+    /* Top Navigation Bar */
+    header {
+      width: 100%;
+      background: linear-gradient(135deg, #0984e3, #00cec9);
+      color: white;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+      position: relative;
+      z-index: 20;
+    }
+
+    .back-btn {
+      background: #ff4757;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      font-size: 1.1rem;
+      padding: 10px 18px;
+      border-radius: 50px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 10px rgba(255, 71, 87, 0.4);
+      transition: all 0.2s ease;
+      border: 2px solid white;
+    }
+
+    .back-btn:hover {
+      transform: scale(1.05);
+      background: #ff6b81;
+    }
+
+    .header-title {
+      font-size: 1.35rem;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .sound-btn, .restart-btn {
+      background: rgba(255, 255, 255, 0.25);
+      border: 2px solid white;
+      color: white;
+      font-size: 1.1rem;
+      padding: 6px 14px;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: 0.2s;
+    }
+    .sound-btn:hover, .restart-btn:hover {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.05);
+    }
+
+    /* Selection Screen (Hero, Horse, Weapon) */
+    .selection-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(135deg, rgba(9, 132, 227, 0.95), rgba(108, 92, 231, 0.95));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 16px;
+      backdrop-filter: blur(6px);
+    }
+
+    .selection-card {
+      background: white;
+      width: 100%;
+      max-width: 780px;
+      border-radius: 32px;
+      padding: 24px 28px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+      border: 6px solid #ffeaa7;
+      text-align: center;
+      max-height: 94vh;
+      overflow-y: auto;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.85); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .selection-title {
+      font-size: 1.8rem;
+      color: #2d3436;
+      margin-bottom: 6px;
+    }
+
+    .selection-subtitle {
+      font-size: 1.05rem;
+      color: #636e72;
+      margin-bottom: 20px;
+    }
+
+    .select-section {
+      margin-bottom: 18px;
+      background: #f8f9fa;
+      border: 2px dashed #b2bec3;
+      border-radius: 20px;
+      padding: 12px 14px;
+    }
+
+    .section-label {
+      font-size: 1.15rem;
+      font-weight: bold;
+      color: #0984e3;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .choice-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .choice-btn {
+      background: white;
+      border: 3px solid #dfe6e9;
+      border-radius: 18px;
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      font-family: inherit;
+    }
+
+    .choice-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.1);
+      border-color: #74b9ff;
+    }
+
+    .choice-btn.active {
+      border-color: #00b894;
+      background: #e6fffa;
+      box-shadow: 0 6px 18px rgba(0, 184, 148, 0.3);
+      transform: scale(1.02);
+    }
+
+    .choice-icon {
+      font-size: 2.2rem;
+    }
+
+    .choice-name {
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #2d3436;
+    }
+
+    .choice-desc {
+      font-size: 0.85rem;
+      color: #636e72;
+    }
+
+    /* Live Preview Banner in Selection */
+    .preview-summary {
+      background: linear-gradient(135deg, #fdcb6e, #ffeaa7);
+      border-radius: 20px;
+      padding: 12px 16px;
+      margin-top: 14px;
+      margin-bottom: 18px;
+      font-size: 1.15rem;
+      font-weight: bold;
+      color: #d35400;
+      border: 3px solid #e17055;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 4px 12px rgba(225, 112, 85, 0.2);
+    }
+
+    .start-game-btn {
+      background: linear-gradient(135deg, #00b894, #00cec9);
+      color: white;
+      border: 3px solid white;
+      font-family: inherit;
+      font-size: 1.35rem;
+      font-weight: bold;
+      padding: 14px 32px;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 24px rgba(0, 184, 148, 0.4);
+      transition: all 0.2s ease;
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .start-game-btn:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #55efc4, #00b894);
+    }
+
+    /* In-Game HUD */
+    .hud-bar {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-around;
+      gap: 10px;
+      padding: 8px 12px;
+      margin-top: 8px;
+      z-index: 5;
+    }
+
+    .hud-item {
+      background: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 1.05rem;
+      font-weight: bold;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border: 3px solid #74b9ff;
+    }
+
+    .hud-wave { border-color: #6c5ce7; color: #6c5ce7; background: #f3f0ff; }
+    .hud-base-hp { border-color: #e17055; color: #d63031; background: #fff5f5; }
+    .hud-wall-hp { border-color: #8d6e63; color: #5d4037; background: #fffaf0; }
+    .hud-hero-hp { border-color: #00b894; color: #00b894; background: #f0fff4; }
+    .hud-bears { border-color: #0984e3; color: #0984e3; background: #ebf7ff; }
+
+    .hp-bar-container {
+      width: 90px;
+      height: 14px;
+      background: #dfe6e9;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #b2bec3;
+      display: inline-block;
+      vertical-align: middle;
+      margin-left: 4px;
+    }
+
+    .hp-bar-fill {
+      height: 100%;
+      width: 100%;
+      transition: width 0.2s ease;
+    }
+    .base-hp-fill { background: linear-gradient(90deg, #ff7675, #d63031); }
+    .wall-hp-fill { background: linear-gradient(90deg, #bcaaa4, #8d6e63); }
+    .hero-hp-fill { background: linear-gradient(90deg, #55efc4, #00b894); }
+
+    /* Game Viewport / Canvas */
+    .game-viewport {
+      width: 100%;
+      max-width: 1000px;
+      height: 560px;
+      background: #f1f8fc;
+      border-radius: 24px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+      border: 5px solid white;
+      margin: 6px 12px 12px;
+      cursor: crosshair;
+    }
+
+    #gameCanvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Wave Announcement Banner */
+    .wave-banner {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.8);
+      background: rgba(45, 52, 54, 0.9);
+      color: #ffeaa7;
+      padding: 12px 28px;
+      border-radius: 50px;
+      font-size: 1.35rem;
+      font-weight: bold;
+      border: 3px solid #fdcb6e;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 15;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .wave-banner.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    /* Touch / Click Controls Panel */
+    .touch-controls {
+      width: 100%;
+      max-width: 1000px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 12px;
+      padding: 6px 12px 18px;
+    }
+
+    .ctrl-btn {
+      background: #0984e3;
+      color: white;
+      border: 3px solid white;
+      font-family: inherit;
+      font-size: 1.15rem;
+      font-weight: bold;
+      padding: 12px 24px;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(9, 132, 227, 0.35);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.15s ease;
+      touch-action: manipulation;
+    }
+
+    .ctrl-btn:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.1);
+    }
+    .ctrl-btn:active {
+      transform: translateY(1px) scale(0.96);
+    }
+
+    .btn-attack {
+      background: linear-gradient(135deg, #e74c3c, #c0392b);
+      box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+      font-size: 1.25rem;
+      padding: 14px 30px;
+    }
+
+    .btn-repair {
+      background: linear-gradient(135deg, #27ae60, #2ecc71);
+      box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+    }
+
+    .btn-dash {
+      background: linear-gradient(135deg, #f39c12, #f1c40f);
+      box-shadow: 0 5px 15px rgba(241, 196, 15, 0.4);
+      color: #2d3436;
+    }
+
+    .controls-hint {
+      width: 100%;
+      text-align: center;
+      font-size: 0.95rem;
+      color: #636e72;
+      margin-top: 4px;
+    }
+
+    /* Modal Dialogs (Victory & Game Over) */
+    .result-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 120;
+      backdrop-filter: blur(5px);
+      padding: 16px;
+    }
+    .result-modal.active {
+      display: flex;
+    }
+
+    .result-box {
+      background: white;
+      width: 100%;
+      max-width: 520px;
+      border-radius: 30px;
+      padding: 30px 24px;
+      text-align: center;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+      border: 6px solid #fdcb6e;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .result-icon {
+      font-size: 4rem;
+      margin-bottom: 10px;
+      animation: bounce 1s infinite alternate;
+    }
+
+    @keyframes bounce {
+      from { transform: translateY(0); }
+      to { transform: translateY(-10px); }
+    }
+
+    .result-title {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #2d3436;
+      margin-bottom: 10px;
+    }
+
+    .result-desc {
+      font-size: 1.1rem;
+      color: #636e72;
+      line-height: 1.5;
+      margin-bottom: 22px;
+    }
+
+    .result-stats {
+      background: #f8f9fa;
+      border-radius: 18px;
+      padding: 12px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-around;
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #2c3e50;
+      border: 2px solid #dfe6e9;
+    }
+
+    .result-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn-play-again {
+      background: linear-gradient(135deg, #00b894, #00cec9);
+      color: white;
+      border: none;
+      font-family: inherit;
+      font-size: 1.25rem;
+      font-weight: bold;
+      padding: 12px 32px;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0, 184, 148, 0.4);
+      width: 100%;
+      max-width: 320px;
+      transition: 0.2s;
+    }
+    .btn-play-again:hover {
+      transform: scale(1.05);
+    }
+
+    .btn-change-loadout {
+      background: #6c5ce7;
+      color: white;
+      border: none;
+      font-family: inherit;
+      font-size: 1.05rem;
+      font-weight: bold;
+      padding: 10px 24px;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(108, 92, 231, 0.3);
+      width: 100%;
+      max-width: 320px;
+      transition: 0.2s;
+    }
+
+    /* Small on-screen virtual joystick pad for mobile */
+    @media (max-width: 768px) {
+      .game-viewport {
+        height: 440px;
+      }
+      .header-title {
+        font-size: 1.1rem;
+      }
+      .choice-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header>
+    <a href="../../index.html" class="back-btn" id="btnBackArcade">
+      ⬅️ Back to Arcade
+    </a>
+    <div class="header-title">
+      🛡️ Defend the Base
+    </div>
+    <div class="header-actions">
+      <button class="restart-btn" id="btnChangeHero" title="Change Hero, Horse or Weapon">
+        🔄 Hero Select
+      </button>
+      <button class="sound-btn" id="soundBtn" title="Toggle Sound">
+        🔊 Sound: ON
+      </button>
+    </div>
+  </header>
+
+  <!-- CHARACTER SELECTION OVERLAY (Boy/Girl, Golden/Pink Horse, Sword/Bow) -->
+  <div class="selection-overlay" id="selectionOverlay">
+    <div class="selection-card">
+      <div class="selection-title">🌟 Defend the Base: Hero Armory! 🌟</div>
+      <div class="selection-subtitle">Choose your brave fighter, magical horse, and weapon before spawning at the circular base!</div>
+
+      <!-- 1. Fighter Selection -->
+      <div class="select-section">
+        <div class="section-label">1️⃣ Pick Your Fighter:</div>
+        <div class="choice-grid">
+          <button class="choice-btn active" data-type="fighter" data-val="boy" id="choiceBoy">
+            <span class="choice-icon">👦</span>
+            <span class="choice-name">Boy Fighter</span>
+            <span class="choice-desc">Brave knight with valiant armor!</span>
+          </button>
+          <button class="choice-btn" data-type="fighter" data-val="girl" id="choiceGirl">
+            <span class="choice-icon">👧</span>
+            <span class="choice-name">Girl Fighter</span>
+            <span class="choice-desc">Swift warrior with royal cape!</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 2. Horse Selection -->
+      <div class="select-section">
+        <div class="section-label">2️⃣ Pick Your Horse:</div>
+        <div class="choice-grid">
+          <button class="choice-btn active" data-type="horse" data-val="golden" id="choiceGolden">
+            <span class="choice-icon">🐴✨</span>
+            <span class="choice-name">Golden Horse</span>
+            <span class="choice-desc">Gleaming sunny coat & golden mane!</span>
+          </button>
+          <button class="choice-btn" data-type="horse" data-val="pink" id="choicePink">
+            <span class="choice-icon">🦄💖</span>
+            <span class="choice-name">Pink Horse</span>
+            <span class="choice-desc">Magical sparkling pink & magenta mane!</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Weapon Selection -->
+      <div class="select-section">
+        <div class="section-label">3️⃣ Pick Your Weapon:</div>
+        <div class="choice-grid">
+          <button class="choice-btn active" data-type="weapon" data-val="sword" id="choiceSword">
+            <span class="choice-icon">⚔️</span>
+            <span class="choice-name">Knight's Sword</span>
+            <span class="choice-desc">Super fast melee slashes & knockback!</span>
+          </button>
+          <button class="choice-btn" data-type="weapon" data-val="bow" id="choiceBow">
+            <span class="choice-icon">🏹</span>
+            <span class="choice-name">Ranger's Bow</span>
+            <span class="choice-desc">Shoots long-range arrows from afar!</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Selection Summary -->
+      <div class="preview-summary" id="previewSummary">
+        Ready: 👦 Boy on 🐴 Golden Horse with ⚔️ Sword!
+      </div>
+
+      <button class="start-game-btn" id="btnStartGame">
+        🚀 SPAWN IN BASE & DEFEND! 🛡️
+      </button>
+    </div>
+  </div>
+
+  <!-- In-Game HUD -->
+  <div class="hud-bar">
+    <div class="hud-item hud-wave">
+      <span>🌊</span>
+      <span>Wave: <strong id="hudWaveNum">1</strong> / 3</span>
+    </div>
+
+    <div class="hud-item hud-base-hp">
+      <span>🔥 Campfire:</span>
+      <div class="hp-bar-container">
+        <div class="hp-bar-fill base-hp-fill" id="baseHpFill" style="width: 100%;"></div>
+      </div>
+      <span id="baseHpText">100%</span>
+    </div>
+
+    <div class="hud-item hud-wall-hp">
+      <span>🪵 Wall:</span>
+      <div class="hp-bar-container">
+        <div class="hp-bar-fill wall-hp-fill" id="wallHpFill" style="width: 100%;"></div>
+      </div>
+      <span id="wallHpText">100%</span>
+    </div>
+
+    <div class="hud-item hud-hero-hp">
+      <span>❤️ Hero HP:</span>
+      <div class="hp-bar-container">
+        <div class="hp-bar-fill hero-hp-fill" id="heroHpFill" style="width: 100%;"></div>
+      </div>
+      <span id="heroHpText">100%</span>
+    </div>
+
+    <div class="hud-item hud-bears">
+      <span>🐻‍❄️ Bears Remaining:</span>
+      <strong id="hudBearsLeft">5</strong>
+    </div>
+  </div>
+
+  <!-- Game Canvas Container -->
+  <div class="game-viewport" id="viewport">
+    <canvas id="gameCanvas" width="1000" height="560"></canvas>
+    
+    <!-- Floating Wave Announcement -->
+    <div class="wave-banner" id="waveBanner">
+      🌊 WAVE 1: Protect the Campfire!
+    </div>
+  </div>
+
+  <!-- Bottom Buttons for Mobile & Quick Action -->
+  <div class="touch-controls">
+    <button class="ctrl-btn btn-attack" id="btnTouchAttack">
+      <span id="attackBtnIcon">⚔️</span>
+      <span id="attackBtnLabel">ATTACK! (Spacebar)</span>
+    </button>
+    <button class="ctrl-btn btn-dash" id="btnTouchDash">
+      ⚡ GALLOP BOOST! (Shift)
+    </button>
+    <button class="ctrl-btn btn-repair" id="btnTouchRepair">
+      🪵 FIX WALL! (Click Wood)
+    </button>
+  </div>
+
+  <div class="controls-hint">
+    🎮 <strong>Controls:</strong> Arrow Keys or <strong>W, A, S, D</strong> to Ride Horse | <strong>Spacebar</strong> or <strong>Left-Click</strong> to Attack | Tap or Click screen to ride there!
+  </div>
+
+  <!-- Victory / Game Over Modals -->
+  <div class="result-modal" id="victoryModal">
+    <div class="result-box">
+      <div class="result-icon">🏆✨</div>
+      <div class="result-title">YOU WON! BASE SAVED!</div>
+      <div class="result-desc">
+        Hooray Kokia! Your brave fighter and horse defended the circular base and campfire through all <strong>3 Waves of Polar Bears</strong>! The snowy kingdom is safe! 🎉
+      </div>
+      <div class="result-stats">
+        <div>🐻‍❄️ Bears Defeated: <strong id="vicBears">18</strong></div>
+        <div>🔥 Base Health: <strong id="vicHealth">100%</strong></div>
+      </div>
+      <div class="result-buttons">
+        <button class="btn-play-again" id="btnVictoryPlayAgain">
+          🔄 Play Again!
+        </button>
+        <button class="btn-change-loadout" id="btnVictoryChange">
+          🐴 Try Different Horse or Weapon!
+        </button>
+        <a href="../../index.html" class="back-btn" style="text-align: center; justify-content: center; width: 100%; max-width: 320px;">
+          ⬅️ Back to Arcade
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="result-modal" id="defeatModal">
+    <div class="result-box">
+      <div class="result-icon">❄️🏕️</div>
+      <div class="result-title" style="color: #d63031;">The Campfire Went Out!</div>
+      <div class="result-desc">
+        The polar bears got too close to the campfire! But real heroes never give up—climb back onto your horse and protect the base again! 🐴💪
+      </div>
+      <div class="result-buttons">
+        <button class="btn-play-again" id="btnDefeatRetry">
+          🛡️ Defend Again!
+        </button>
+        <button class="btn-change-loadout" id="btnDefeatChange">
+          ⚙️ Change Fighter / Weapon
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    /* =========================================================================
+       AUDIO SYSTEM (Pure Web Audio API synthesizer - no external assets!)
+       ========================================================================= */
+    let audioCtx = null;
+    let soundEnabled = true;
+
+    function initAudio() {
+      if (!audioCtx) {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        audioCtx = new AudioContext();
+      }
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+    }
+
+    function playTone(freq, type, duration, startVol = 0.2, endVol = 0.01) {
+      if (!soundEnabled) return;
+      initAudio();
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(startVol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(endVol, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    // Clip-clop horse gallop sound
+    let lastClopTime = 0;
+    function playGallopSound() {
+      const now = Date.now();
+      if (now - lastClopTime < 220) return;
+      lastClopTime = now;
+      if (!soundEnabled) return;
+      initAudio();
+      try {
+        const t = audioCtx.currentTime;
+        // Two quick woodblock-like clicks
+        const osc1 = audioCtx.createOscillator();
+        const gain1 = audioCtx.createGain();
+        osc1.type = 'triangle';
+        osc1.frequency.setValueAtTime(320, t);
+        osc1.frequency.exponentialRampToValueAtTime(140, t + 0.05);
+        gain1.gain.setValueAtTime(0.18, t);
+        gain1.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+        osc1.connect(gain1);
+        gain1.connect(audioCtx.destination);
+        osc1.start(t);
+        osc1.stop(t + 0.05);
+
+        const osc2 = audioCtx.createOscillator();
+        const gain2 = audioCtx.createGain();
+        osc2.type = 'triangle';
+        osc2.frequency.setValueAtTime(260, t + 0.08);
+        osc2.frequency.exponentialRampToValueAtTime(110, t + 0.13);
+        gain2.gain.setValueAtTime(0.14, t + 0.08);
+        gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.13);
+        osc2.connect(gain2);
+        gain2.connect(audioCtx.destination);
+        osc2.start(t + 0.08);
+        osc2.stop(t + 0.13);
+      } catch (e) {}
+    }
+
+    // Sword Swoosh
+    function playSwordSound() {
+      if (!soundEnabled) return;
+      initAudio();
+      try {
+        const t = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(600, t);
+        osc.frequency.exponentialRampToValueAtTime(180, t + 0.18);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.18);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.18);
+      } catch (e) {}
+    }
+
+    // Bow Twang & Arrow Whoosh
+    function playBowSound() {
+      if (!soundEnabled) return;
+      initAudio();
+      try {
+        const t = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(240, t);
+        osc.frequency.exponentialRampToValueAtTime(800, t + 0.07);
+        osc.frequency.exponentialRampToValueAtTime(400, t + 0.22);
+        gain.gain.setValueAtTime(0.22, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.22);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.22);
+      } catch (e) {}
+    }
+
+    // Bear Roar / Grunt
+    function playBearSound() {
+      if (!soundEnabled) return;
+      initAudio();
+      try {
+        const t = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(95, t);
+        osc.frequency.linearRampToValueAtTime(75, t + 0.15);
+        osc.frequency.linearRampToValueAtTime(110, t + 0.3);
+        gain.gain.setValueAtTime(0.2, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.35);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.35);
+      } catch (e) {}
+    }
+
+    // Bear Poof / Defeat sound
+    function playBearPoofSound() {
+      if (!soundEnabled) return;
+      initAudio();
+      try {
+        const t = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(300, t);
+        osc.frequency.exponentialRampToValueAtTime(600, t + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(150, t + 0.25);
+        gain.gain.setValueAtTime(0.25, t);
+        gain.gain.exponentialRampToValueAtTime(0.01, t + 0.25);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(t);
+        osc.stop(t + 0.25);
+      } catch (e) {}
+    }
+
+    // Wave Horn
+    function playWaveHorn() {
+      if (!soundEnabled) return;
+      initAudio();
+      const notes = [330, 440, 550, 660];
+      notes.forEach((f, idx) => {
+        setTimeout(() => {
+          playTone(f, 'triangle', 0.22, 0.22);
+        }, idx * 110);
+      });
+    }
+
+    // Victory Fanfare
+    function playVictoryFanfare() {
+      if (!soundEnabled) return;
+      initAudio();
+      const notes = [440, 440, 440, 554, 659, 880];
+      const times = [0, 160, 320, 480, 640, 850];
+      notes.forEach((f, idx) => {
+        setTimeout(() => {
+          playTone(f, 'square', 0.3, 0.22);
+        }, times[idx]);
+      });
+    }
+
+    // Defeat Sad Jingle
+    function playDefeatJingle() {
+      if (!soundEnabled) return;
+      initAudio();
+      const notes = [440, 415, 392, 349];
+      notes.forEach((f, idx) => {
+        setTimeout(() => {
+          playTone(f, 'sine', 0.4, 0.2);
+        }, idx * 220);
+      });
+    }
+
+    // Toggle sound
+    const soundBtn = document.getElementById('soundBtn');
+    soundBtn.addEventListener('click', () => {
+      soundEnabled = !soundEnabled;
+      soundBtn.textContent = soundEnabled ? '🔊 Sound: ON' : '🔇 Sound: OFF';
+    });
+
+    /* =========================================================================
+       CUSTOMIZATION & LOADOUT STATE (Kokia's choices!)
+       ========================================================================= */
+    const loadout = {
+      fighter: 'boy',     // 'boy' or 'girl'
+      horse: 'golden',    // 'golden' or 'pink'
+      weapon: 'sword'     // 'sword' or 'bow'
+    };
+
+    // UI elements
+    const selectionOverlay = document.getElementById('selectionOverlay');
+    const previewSummary = document.getElementById('previewSummary');
+    const btnStartGame = document.getElementById('btnStartGame');
+    const btnChangeHero = document.getElementById('btnChangeHero');
+    const attackBtnIcon = document.getElementById('attackBtnIcon');
+    const attackBtnLabel = document.getElementById('attackBtnLabel');
+
+    function updatePreviewSummary() {
+      const fText = loadout.fighter === 'boy' ? '👦 Boy' : '👧 Girl';
+      const hText = loadout.horse === 'golden' ? '🐴 Golden Horse' : '🦄 Pink Horse';
+      const wText = loadout.weapon === 'sword' ? '⚔️ Sword' : '🏹 Bow';
+      previewSummary.textContent = `Ready: ${fText} on ${hText} with ${wText}!`;
+
+      // Update in-game attack button text
+      if (loadout.weapon === 'sword') {
+        attackBtnIcon.textContent = '⚔️';
+        attackBtnLabel.textContent = 'SWORD SLASH! (Space)';
+      } else {
+        attackBtnIcon.textContent = '🏹';
+        attackBtnLabel.textContent = 'SHOOT ARROW! (Space)';
+      }
+    }
+
+    document.querySelectorAll('.choice-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = btn.getAttribute('data-type');
+        const val = btn.getAttribute('data-val');
+
+        document.querySelectorAll(`.choice-btn[data-type="${type}"]`).forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        loadout[type] = val;
+        playTone(520, 'sine', 0.1, 0.15);
+        updatePreviewSummary();
+      });
+    });
+
+    btnChangeHero.addEventListener('click', () => {
+      selectionOverlay.style.display = 'flex';
+      gameState.isPaused = true;
+    });
+
+    btnStartGame.addEventListener('click', () => {
+      initAudio();
+      selectionOverlay.style.display = 'none';
+      startNewGame();
+    });
+
+    /* =========================================================================
+       GAME ENGINE & CANVAS WORLD SETUP
+       ========================================================================= */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Logical dimensions
+    const W = 1000;
+    const H = 560;
+
+    // Base settings (Circular Base in center)
+    const baseCenter = { x: W / 2, y: H / 2 };
+    const baseRadius = 135;
+    const campfireRadius = 32;
+
+    // Game state
+    const gameState = {
+      gameStarted: false, // Remains false until Kokia clicks "SPAWN IN BASE & DEFEND!"
+      isPaused: true,     // Paused while in the Armory menu
+      gameOver: false,
+      won: false,
+      currentWave: 1,
+      totalWaves: 3,
+      baseHp: 200,        // Sturdy campfire health
+      maxBaseHp: 200,
+      wallHp: 300,        // Tough wooden palisade wall
+      maxWallHp: 300,
+      heroHp: 150,        // Generous hero health
+      maxHeroHp: 150,
+      bearsSpawnedInWave: 0,
+      bearsToSpawnInWave: 0,
+      bearsDefeatedInWave: 0,
+      totalBearsDefeated: 0,
+      waveSpawnTimer: 0,
+      nextBearDelay: 180, // Generous spacing between bears
+      score: 0
+    };
+
+    // Hero Object
+    const hero = {
+      x: baseCenter.x,
+      y: baseCenter.y + 40,
+      vx: 0,
+      vy: 0,
+      speed: 3.8,
+      dashMultiplier: 1.6,
+      isDashing: false,
+      facingRight: true,
+      angle: 0,
+      gallopCycle: 0,
+      isMoving: false,
+      attackCooldown: 0,
+      attackMaxCooldown: 18,
+      slashAnimation: 0, // > 0 when swinging sword
+      invulnerableTimer: 0, // Hit flash protection
+      radius: 28
+    };
+
+    // Input state
+    const keys = {
+      ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false,
+      w: false, s: false, a: false, d: false,
+      Space: false, Shift: false
+    };
+
+    let targetMovePos = null; // for tap-to-move / mouse follow
+
+    window.addEventListener('keydown', (e) => {
+      const k = e.key.toLowerCase();
+      if (k === 'w' || k === 'arrowup') keys.w = true;
+      if (k === 's' || k === 'arrowdown') keys.s = true;
+      if (k === 'a' || k === 'arrowleft') keys.a = true;
+      if (k === 'd' || k === 'arrowright') keys.d = true;
+      if (e.code === 'Space') {
+        keys.Space = true;
+        heroAttack();
+      }
+      if (e.key === 'Shift') keys.Shift = true;
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const k = e.key.toLowerCase();
+      if (k === 'w' || k === 'arrowup') keys.w = false;
+      if (k === 's' || k === 'arrowdown') keys.s = false;
+      if (k === 'a' || k === 'arrowleft') keys.a = false;
+      if (k === 'd' || k === 'arrowright') keys.d = false;
+      if (e.code === 'Space') keys.Space = false;
+      if (e.key === 'Shift') keys.Shift = false;
+    });
+
+    // Mouse / Touch navigation
+    canvas.addEventListener('pointerdown', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const scaleX = canvas.width / rect.width;
+      const scaleY = canvas.height / rect.height;
+      const clickX = (e.clientX - rect.left) * scaleX;
+      const clickY = (e.clientY - rect.top) * scaleY;
+
+      // Check if clicked near an enemy: trigger attack in that direction!
+      let clickedEnemy = false;
+      for (let b of bears) {
+        const dist = Math.hypot(b.x - clickX, b.y - clickY);
+        if (dist < 40) {
+          clickedEnemy = true;
+          // Aim towards enemy and attack!
+          hero.angle = Math.atan2(b.y - hero.y, b.x - hero.x);
+          hero.facingRight = (b.x >= hero.x);
+          heroAttack();
+          break;
+        }
+      }
+
+      if (!clickedEnemy) {
+        targetMovePos = { x: clickX, y: clickY };
+      }
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (e.buttons === 1) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        targetMovePos = {
+          x: (e.clientX - rect.left) * scaleX,
+          y: (e.clientY - rect.top) * scaleY
+        };
+      }
+    });
+
+    window.addEventListener('pointerup', () => {
+      targetMovePos = null;
+    });
+
+    // Touch Buttons
+    document.getElementById('btnTouchAttack').addEventListener('click', () => {
+      heroAttack();
+    });
+
+    const dashBtn = document.getElementById('btnTouchDash');
+    dashBtn.addEventListener('pointerdown', () => { hero.isDashing = true; });
+    dashBtn.addEventListener('pointerup', () => { hero.isDashing = false; });
+
+    document.getElementById('btnTouchRepair').addEventListener('click', () => {
+      repairBase();
+    });
+
+    function repairBase() {
+      if (gameState.wallHp < gameState.maxWallHp || gameState.baseHp < gameState.maxBaseHp) {
+        gameState.wallHp = Math.min(gameState.maxWallHp, gameState.wallHp + 25);
+        gameState.baseHp = Math.min(gameState.maxBaseHp, gameState.baseHp + 15);
+        playTone(660, 'sine', 0.15, 0.2);
+        createSparkles(baseCenter.x, baseCenter.y, '#2ecc71', 12);
+        updateHUD();
+      }
+    }
+
+    /* =========================================================================
+       GAME ENTITIES: ARROWS, BEARS, PARTICLES, SNOW
+       ========================================================================= */
+    let arrows = [];
+    let bears = [];
+    let particles = [];
+    let snowflakes = [];
+    let footsteps = [];
+
+    // Initialize 60 ambient snowflakes
+    for (let i = 0; i < 70; i++) {
+      snowflakes.push({
+        x: Math.random() * W,
+        y: Math.random() * H,
+        radius: 1.5 + Math.random() * 2.5,
+        speed: 0.6 + Math.random() * 1.4,
+        drift: (Math.random() - 0.5) * 0.6
+      });
+    }
+
+    // Snowy trees in the background
+    const snowyTrees = [
+      { x: 90, y: 90 }, { x: 220, y: 70 }, { x: 860, y: 90 }, { x: 920, y: 220 },
+      { x: 900, y: 460 }, { x: 780, y: 500 }, { x: 80, y: 480 }, { x: 180, y: 490 },
+      { x: 60, y: 280 }, { x: 940, y: 350 }
+    ];
+
+    /* =========================================================================
+       HERO ACTIONS: ATTACK (Sword or Bow)
+       ========================================================================= */
+    function heroAttack() {
+      if (hero.attackCooldown > 0) return;
+      hero.attackCooldown = hero.attackMaxCooldown;
+
+      if (loadout.weapon === 'sword') {
+        playSwordSound();
+        hero.slashAnimation = 12; // 12 frames of visual arc
+
+        // Sword Hit Check (Melee arc in front of horse)
+        const attackRange = 85;
+        const attackAngle = hero.facingRight ? 0 : Math.PI;
+
+        bears.forEach(b => {
+          const dx = b.x - hero.x;
+          const dy = b.y - hero.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < attackRange) {
+            // Directional check
+            const bearAngle = Math.atan2(dy, dx);
+            let diff = Math.abs(bearAngle - attackAngle);
+            if (diff > Math.PI) diff = 2 * Math.PI - diff;
+
+            if (diff < Math.PI / 1.5 || dist < 45) {
+              hitBear(b, 35, dx, dy);
+            }
+          }
+        });
+      } else {
+        // Bow Shoot Arrow!
+        playBowSound();
+
+        // Find nearest bear to target, or shoot in facing direction
+        let targetAngle = hero.facingRight ? 0 : Math.PI;
+        let nearestBear = null;
+        let minDist = 380;
+
+        bears.forEach(b => {
+          const dist = Math.hypot(b.x - hero.x, b.y - hero.y);
+          if (dist < minDist) {
+            minDist = dist;
+            nearestBear = b;
+          }
+        });
+
+        if (nearestBear) {
+          targetAngle = Math.atan2(nearestBear.y - hero.y, nearestBear.x - hero.x);
+          hero.facingRight = (nearestBear.x >= hero.x);
+        }
+
+        arrows.push({
+          x: hero.x + (hero.facingRight ? 20 : -20),
+          y: hero.y - 10,
+          vx: Math.cos(targetAngle) * 8.5,
+          vy: Math.sin(targetAngle) * 8.5,
+          angle: targetAngle,
+          life: 75,
+          damage: 30
+        });
+
+        createSparkles(hero.x + (hero.facingRight ? 25 : -25), hero.y - 10, '#ffeaa7', 4);
+      }
+    }
+
+    function hitBear(bear, dmg, dirX, dirY) {
+      bear.hp -= dmg;
+      bear.flashTime = 8;
+      playTone(280, 'sine', 0.1, 0.2);
+
+      // Knockback
+      const len = Math.hypot(dirX, dirY) || 1;
+      bear.x += (dirX / len) * 18;
+      bear.y += (dirY / len) * 18;
+
+      createSparkles(bear.x, bear.y, '#dfe6e9', 8);
+
+      if (bear.hp <= 0) {
+        defeatBear(bear);
+      }
+    }
+
+    function defeatBear(bear) {
+      playBearPoofSound();
+      bear.isDead = true;
+      gameState.bearsDefeatedInWave++;
+      gameState.totalBearsDefeated++;
+      createSparkles(bear.x, bear.y, '#ffffff', 18);
+      createSparkles(bear.x, bear.y, '#fdcb6e', 8); // shiny stars!
+      updateHUD();
+
+      // Check if wave finished
+      if (gameState.bearsDefeatedInWave >= gameState.bearsToSpawnInWave) {
+        completeWave();
+      }
+    }
+
+    function createSparkles(x, y, color, count = 8) {
+      for (let i = 0; i < count; i++) {
+        const speed = 1 + Math.random() * 3.5;
+        const ang = Math.random() * Math.PI * 2;
+        particles.push({
+          x: x,
+          y: y,
+          vx: Math.cos(ang) * speed,
+          vy: Math.sin(ang) * speed,
+          color: color,
+          radius: 2 + Math.random() * 3,
+          alpha: 1,
+          decay: 0.03 + Math.random() * 0.03
+        });
+      }
+    }
+
+    /* =========================================================================
+       WAVE MANAGEMENT (3 Waves of Polar Bears)
+       ========================================================================= */
+    function showWaveBanner(msg) {
+      const banner = document.getElementById('waveBanner');
+      banner.textContent = msg;
+      banner.classList.add('show');
+      playWaveHorn();
+      setTimeout(() => {
+        banner.classList.remove('show');
+      }, 3000);
+    }
+
+    function startWave(waveNum) {
+      gameState.currentWave = waveNum;
+      gameState.bearsDefeatedInWave = 0;
+      gameState.bearsSpawnedInWave = 0;
+      gameState.waveSpawnTimer = 0;
+
+      if (waveNum === 1) {
+        gameState.bearsToSpawnInWave = 5;
+        gameState.nextBearDelay = 180; // ~3 seconds between bears
+        showWaveBanner('🌊 WAVE 1: 5 Fluffy Polar Bears Trudging Slowly!');
+      } else if (waveNum === 2) {
+        gameState.bearsToSpawnInWave = 7;
+        gameState.nextBearDelay = 150; // ~2.5 seconds between bears
+        showWaveBanner('🌊 WAVE 2: 7 Polar Bears Marching in the Snow!');
+      } else if (waveNum === 3) {
+        gameState.bearsToSpawnInWave = 9; // 8 bears + 1 King Frosty Bear Boss!
+        gameState.nextBearDelay = 140;
+        showWaveBanner('👑 FINAL WAVE 3: King Frosty Polar Bear is Marching!');
+      }
+
+      updateHUD();
+    }
+
+    function spawnPolarBear() {
+      if (gameState.bearsSpawnedInWave >= gameState.bearsToSpawnInWave) return;
+
+      gameState.bearsSpawnedInWave++;
+      const isBoss = (gameState.currentWave === 3 && gameState.bearsSpawnedInWave === gameState.bearsToSpawnInWave);
+
+      // Spawn on edges of tundra
+      let sx, sy;
+      const side = Math.floor(Math.random() * 4);
+      if (side === 0) { sx = Math.random() * W; sy = -40; } // top
+      else if (side === 1) { sx = W + 40; sy = Math.random() * H; } // right
+      else if (side === 2) { sx = Math.random() * W; sy = H + 40; } // bottom
+      else { sx = -40; sy = Math.random() * H; } // left
+
+      // Slow, heavy, realistic snow-wading bear speeds!
+      const speed = isBoss ? 0.30 : (0.35 + (gameState.currentWave - 1) * 0.06 + Math.random() * 0.05);
+      const hp = isBoss ? 180 : (35 + (gameState.currentWave - 1) * 15);
+
+      bears.push({
+        x: sx,
+        y: sy,
+        vx: 0,
+        vy: 0,
+        speed: speed,
+        hp: hp,
+        maxHp: hp,
+        radius: isBoss ? 42 : 24,
+        isBoss: isBoss,
+        isDead: false,
+        flashTime: 0,
+        stepCycle: Math.random() * 10,
+        attackCooldown: 0
+      });
+
+      playBearSound();
+    }
+
+    function completeWave() {
+      if (gameState.currentWave < gameState.totalWaves) {
+        playTone(600, 'sine', 0.2, 0.2);
+        setTimeout(() => {
+          startWave(gameState.currentWave + 1);
+        }, 1800);
+      } else {
+        // Player beats all 3 waves - HE WINS!
+        victory();
+      }
+    }
+
+    function victory() {
+      gameState.won = true;
+      gameState.gameOver = true;
+      playVictoryFanfare();
+      document.getElementById('vicBears').textContent = gameState.totalBearsDefeated;
+      document.getElementById('vicHealth').textContent = Math.round(gameState.baseHp) + '%';
+      document.getElementById('victoryModal').classList.add('active');
+
+      // Massive confetti shower!
+      for (let i = 0; i < 60; i++) {
+        createSparkles(W / 2 + (Math.random() - 0.5) * 400, H / 2 + (Math.random() - 0.5) * 300, ['#f1c40f', '#e84393', '#00cec9', '#2ecc71', '#ff7675'][i % 5], 3);
+      }
+    }
+
+    function heroRespawn() {
+      // Gentle respawn at campfire with trumpet fanfare and heart glow!
+      playTone(523, 'triangle', 0.25, 0.25);
+      setTimeout(() => playTone(659, 'sine', 0.3, 0.25), 120);
+      gameState.heroHp = gameState.maxHeroHp;
+      hero.x = baseCenter.x;
+      hero.y = baseCenter.y + 40;
+      hero.vx = 0;
+      hero.vy = 0;
+      hero.invulnerableTimer = 90; // 1.5 seconds of glowing invulnerability
+      createSparkles(hero.x, hero.y, '#55efc4', 16);
+      showWaveBanner('💖 Hero Revived at the Campfire! Keep Defending! 🐴✨');
+      updateHUD();
+    }
+
+    function defeat() {
+      gameState.gameOver = true;
+      playDefeatJingle();
+      document.getElementById('defeatModal').classList.add('active');
+    }
+
+    /* =========================================================================
+       RESET & START NEW GAME
+       ========================================================================= */
+    function startNewGame() {
+      gameState.gameStarted = true;
+      gameState.gameOver = false;
+      gameState.won = false;
+      gameState.isPaused = false;
+      gameState.baseHp = gameState.maxBaseHp;
+      gameState.wallHp = gameState.maxWallHp;
+      gameState.heroHp = gameState.maxHeroHp;
+      gameState.totalBearsDefeated = 0;
+      bears = [];
+      arrows = [];
+      particles = [];
+      footsteps = [];
+
+      hero.x = baseCenter.x;
+      hero.y = baseCenter.y + 40;
+      hero.vx = 0;
+      hero.vy = 0;
+      hero.slashAnimation = 0;
+      hero.invulnerableTimer = 0;
+
+      document.getElementById('victoryModal').classList.remove('active');
+      document.getElementById('defeatModal').classList.remove('active');
+
+      startWave(1);
+    }
+
+    document.getElementById('btnVictoryPlayAgain').addEventListener('click', () => {
+      startNewGame();
+    });
+    document.getElementById('btnDefeatRetry').addEventListener('click', () => {
+      startNewGame();
+    });
+    document.getElementById('btnVictoryChange').addEventListener('click', () => {
+      document.getElementById('victoryModal').classList.remove('active');
+      selectionOverlay.style.display = 'flex';
+      gameState.isPaused = true;
+      gameState.gameStarted = false;
+    });
+    document.getElementById('btnDefeatChange').addEventListener('click', () => {
+      document.getElementById('defeatModal').classList.remove('active');
+      selectionOverlay.style.display = 'flex';
+      gameState.isPaused = true;
+      gameState.gameStarted = false;
+    });
+
+    /* =========================================================================
+       UPDATE HUD
+       ========================================================================= */
+    function updateHUD() {
+      document.getElementById('hudWaveNum').textContent = gameState.currentWave;
+      const leftInWave = Math.max(0, gameState.bearsToSpawnInWave - gameState.bearsDefeatedInWave);
+      document.getElementById('hudBearsLeft').textContent = leftInWave;
+
+      // Base Campfire HP Fill
+      const basePct = Math.max(0, Math.min(100, (gameState.baseHp / gameState.maxBaseHp) * 100));
+      document.getElementById('baseHpFill').style.width = basePct + '%';
+      document.getElementById('baseHpText').textContent = Math.round(basePct) + '%';
+
+      // Wall HP Fill
+      const wallPct = Math.max(0, Math.min(100, (gameState.wallHp / gameState.maxWallHp) * 100));
+      const wallFill = document.getElementById('wallHpFill');
+      if (wallFill) wallFill.style.width = wallPct + '%';
+      const wallText = document.getElementById('wallHpText');
+      if (wallText) wallText.textContent = Math.round(wallPct) + '%';
+
+      // Hero HP Fill
+      const heroPct = Math.max(0, Math.min(100, (gameState.heroHp / gameState.maxHeroHp) * 100));
+      document.getElementById('heroHpFill').style.width = heroPct + '%';
+      document.getElementById('heroHpText').textContent = Math.round(heroPct) + '%';
+    }
+
+    /* =========================================================================
+       MAIN GAME LOOP: UPDATE & PHYSICS
+       ========================================================================= */
+    function update() {
+      if (!gameState.gameStarted || gameState.gameOver || gameState.isPaused) return;
+
+      // 1. Hero Movement Logic
+      let moveX = 0;
+      let moveY = 0;
+
+      if (keys.w) moveY -= 1;
+      if (keys.s) moveY += 1;
+      if (keys.a) moveX -= 1;
+      if (keys.d) moveX += 1;
+
+      // Mouse / Touch tap-to-move
+      if (targetMovePos) {
+        const dx = targetMovePos.x - hero.x;
+        const dy = targetMovePos.y - hero.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 10) {
+          moveX = dx / dist;
+          moveY = dy / dist;
+        } else {
+          targetMovePos = null;
+        }
+      }
+
+      // Normalize diagonal speed
+      if (moveX !== 0 && moveY !== 0 && !targetMovePos) {
+        moveX *= 0.7071;
+        moveY *= 0.7071;
+      }
+
+      const speed = hero.speed * ((keys.Shift || hero.isDashing) ? hero.dashMultiplier : 1.0);
+      hero.vx = moveX * speed;
+      hero.vy = moveY * speed;
+
+      hero.x += hero.vx;
+      hero.y += hero.vy;
+
+      // Constrain hero to canvas bounds
+      hero.x = Math.max(30, Math.min(W - 30, hero.x));
+      hero.y = Math.max(30, Math.min(H - 30, hero.y));
+
+      // Gallop animation & sound
+      hero.isMoving = (Math.abs(hero.vx) > 0.1 || Math.abs(hero.vy) > 0.1);
+      if (hero.isMoving) {
+        hero.gallopCycle += 0.25;
+        playGallopSound();
+
+        if (hero.vx > 0.1) hero.facingRight = true;
+        if (hero.vx < -0.1) hero.facingRight = false;
+
+        // Footsteps in snow
+        if (Math.random() < 0.25) {
+          footsteps.push({
+            x: hero.x + (Math.random() - 0.5) * 8,
+            y: hero.y + 16,
+            alpha: 0.55
+          });
+          if (footsteps.length > 50) footsteps.shift();
+        }
+      }
+
+      // Attack Cooldown & Invulnerability
+      if (hero.attackCooldown > 0) hero.attackCooldown--;
+      if (hero.slashAnimation > 0) hero.slashAnimation--;
+      if (hero.invulnerableTimer > 0) hero.invulnerableTimer--;
+
+      // Cozy Campfire Warmth: Restores hero HP and slowly mends wooden wall when near fire!
+      const heroDistToFire = Math.hypot(hero.x - baseCenter.x, hero.y - baseCenter.y);
+      if (heroDistToFire < 95) {
+        let changed = false;
+        if (gameState.heroHp < gameState.maxHeroHp) {
+          gameState.heroHp = Math.min(gameState.maxHeroHp, gameState.heroHp + 0.15);
+          changed = true;
+        }
+        if (gameState.wallHp < gameState.maxWallHp) {
+          gameState.wallHp = Math.min(gameState.maxWallHp, gameState.wallHp + 0.1);
+          changed = true;
+        }
+        if (changed && Math.random() < 0.1) {
+          createSparkles(hero.x, hero.y - 10, '#55efc4', 1);
+          updateHUD();
+        }
+      }
+
+      // 2. Wave Spawner
+      if (gameState.bearsSpawnedInWave < gameState.bearsToSpawnInWave) {
+        gameState.waveSpawnTimer++;
+        if (gameState.waveSpawnTimer >= gameState.nextBearDelay) {
+          gameState.waveSpawnTimer = 0;
+          spawnPolarBear();
+        }
+      }
+
+      // 3. Update Polar Bears
+      for (let i = bears.length - 1; i >= 0; i--) {
+        const b = bears[i];
+        if (b.isDead) {
+          bears.splice(i, 1);
+          continue;
+        }
+
+        b.stepCycle += 0.055;
+        if (b.flashTime > 0) b.flashTime--;
+        if (b.attackCooldown > 0) b.attackCooldown--;
+
+        // Distance to Campfire Center
+        const distToCamp = Math.hypot(baseCenter.x - b.x, baseCenter.y - b.y);
+
+        // Bears walk towards the campfire
+        const targetX = baseCenter.x;
+        const targetY = baseCenter.y;
+        const dx = targetX - b.x;
+        const dy = targetY - b.y;
+        const dist = Math.hypot(dx, dy) || 1;
+
+        // Wooden wall collision: if wall HP > 0 and hitting perimeter, bear is blocked!
+        if (gameState.wallHp > 0 && distToCamp > baseRadius - 10 && distToCamp < baseRadius + 18) {
+          // Attacking the wooden wall!
+          if (b.attackCooldown <= 0) {
+            b.attackCooldown = 60;
+            gameState.wallHp = Math.max(0, gameState.wallHp - (b.isBoss ? 6 : 2.5));
+            playTone(180, 'sawtooth', 0.12, 0.2);
+            createSparkles(b.x, b.y, '#b2bec3', 4);
+            updateHUD();
+          }
+        } else if (distToCamp > campfireRadius + b.radius) {
+          // Move forward towards campfire!
+          b.x += (dx / dist) * b.speed;
+          b.y += (dy / dist) * b.speed;
+        }
+
+        // Check if bear ACTUALLY reached the Campfire
+        if (distToCamp <= campfireRadius + b.radius) {
+          if (b.attackCooldown <= 0) {
+            b.attackCooldown = 55;
+            gameState.baseHp = Math.max(0, gameState.baseHp - (b.isBoss ? 10 : 4));
+            playTone(130, 'sawtooth', 0.18, 0.25);
+            createSparkles(baseCenter.x, baseCenter.y, '#e17055', 8);
+            showWaveBanner('⚠️ POLAR BEAR IS AT THE CAMPFIRE! DEFEND IT! 🔥');
+            updateHUD();
+
+            if (gameState.baseHp <= 0) {
+              defeat();
+              return;
+            }
+          }
+        }
+
+        // Check if bear hit Hero
+        const distToHero = Math.hypot(hero.x - b.x, hero.y - b.y);
+        if (distToHero < hero.radius + b.radius) {
+          if (b.attackCooldown <= 0 && hero.invulnerableTimer <= 0) {
+            b.attackCooldown = 50;
+            hero.invulnerableTimer = 35; // Invulnerability flash shield
+            gameState.heroHp = Math.max(0, gameState.heroHp - (b.isBoss ? 8 : 3));
+            playTone(210, 'sine', 0.12, 0.2);
+            createSparkles(hero.x, hero.y, '#ff7675', 6);
+            updateHUD();
+
+            // Hero revives at campfire instead of sudden defeat!
+            if (gameState.heroHp <= 0) {
+              heroRespawn();
+            }
+          }
+        }
+      }
+
+      // 4. Update Arrows
+      for (let i = arrows.length - 1; i >= 0; i--) {
+        const a = arrows[i];
+        a.x += a.vx;
+        a.y += a.vy;
+        a.life--;
+
+        // Arrow hit check against bears
+        let hit = false;
+        for (let b of bears) {
+          const dist = Math.hypot(b.x - a.x, b.y - a.y);
+          if (dist < b.radius + 6) {
+            hitBear(b, a.damage, a.vx, a.vy);
+            hit = true;
+            break;
+          }
+        }
+
+        if (hit || a.life <= 0 || a.x < 0 || a.x > W || a.y < 0 || a.y > H) {
+          arrows.splice(i, 1);
+        }
+      }
+
+      // 5. Update Particles
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.alpha -= p.decay;
+        if (p.alpha <= 0) particles.splice(i, 1);
+      }
+
+      // 6. Update Ambient Snowflakes
+      snowflakes.forEach(s => {
+        s.y += s.speed;
+        s.x += s.drift;
+        if (s.y > H) { s.y = -5; s.x = Math.random() * W; }
+        if (s.x > W) s.x = 0;
+        if (s.x < 0) s.x = W;
+      });
+
+      // Fade Footsteps slowly
+      footsteps.forEach(f => { f.alpha -= 0.001; });
+      footsteps = footsteps.filter(f => f.alpha > 0);
+    }
+
+    /* =========================================================================
+       DRAWING ROUTINES (Canvas Graphics)
+       ========================================================================= */
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+
+      // 1. Snowy ground background
+      ctx.fillStyle = '#f0f7fb';
+      ctx.fillRect(0, 0, W, H);
+
+      // Subtle snow drifts (large soft white ellipses)
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.ellipse(200, 140, 180, 80, 0, 0, Math.PI * 2);
+      ctx.ellipse(820, 380, 220, 100, 0, 0, Math.PI * 2);
+      ctx.ellipse(500, 520, 300, 90, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw Pine Trees in the tundra
+      snowyTrees.forEach(t => {
+        drawPineTree(t.x, t.y);
+      });
+
+      // Footprints in snow
+      footsteps.forEach(f => {
+        ctx.fillStyle = `rgba(178, 190, 195, ${f.alpha})`;
+        ctx.beginPath();
+        ctx.ellipse(f.x, f.y, 3, 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // 2. Circular Base (Ground & Wooden Wall)
+      drawCircularBase();
+
+      // 3. Campfire in the Center
+      drawCampfire(baseCenter.x, baseCenter.y);
+
+      // 4. Polar Bears
+      bears.forEach(b => {
+        drawPolarBear(b);
+      });
+
+      // 5. Arrows
+      arrows.forEach(a => {
+        drawArrow(a);
+      });
+
+      // 6. Hero Riding Horse
+      drawHeroAndHorse();
+
+      // 7. Particles & Sparkles
+      particles.forEach(p => {
+        ctx.save();
+        ctx.globalAlpha = p.alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
+
+      // 8. Foreground falling snowflakes
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.85)';
+      snowflakes.forEach(s => {
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.radius, 0, Math.PI * 2);
+        ctx.fill();
+      });
+    }
+
+    /* --- Draw Pine Tree --- */
+    function drawPineTree(x, y) {
+      // Trunk
+      ctx.fillStyle = '#795548';
+      ctx.fillRect(x - 5, y + 20, 10, 16);
+
+      // Green pine layers with snowy tops
+      for (let layer = 0; layer < 3; layer++) {
+        const ly = y + 16 - layer * 14;
+        const lw = 28 - layer * 6;
+
+        ctx.fillStyle = '#2d6a4f';
+        ctx.beginPath();
+        ctx.moveTo(x, ly - 16);
+        ctx.lineTo(x - lw, ly + 6);
+        ctx.lineTo(x + lw, ly + 6);
+        ctx.closePath();
+        ctx.fill();
+
+        // White snow cap
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.moveTo(x, ly - 16);
+        ctx.lineTo(x - lw * 0.6, ly - 2);
+        ctx.lineTo(x + lw * 0.6, ly - 2);
+        ctx.closePath();
+        ctx.fill();
+      }
+    }
+
+    /* --- Draw Circular Base with Wood Floor & Full Circle Wooden Wall --- */
+    function drawCircularBase() {
+      // 1. BASE INTERIOR FLOOR: 100% WARM WOODEN FLOOR PLANKS!
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(baseCenter.x, baseCenter.y, baseRadius, 0, Math.PI * 2);
+      ctx.clip(); // Clip inside circular base
+
+      // Warm wooden deck planks base color
+      ctx.fillStyle = '#b8860b';
+      ctx.fillRect(baseCenter.x - baseRadius, baseCenter.y - baseRadius, baseRadius * 2, baseRadius * 2);
+
+      // Draw horizontal wooden floor planks with alternating wood tones
+      const plankHeight = 16;
+      const startY = baseCenter.y - baseRadius;
+      const endY = baseCenter.y + baseRadius;
+      const plankColors = ['#c89658', '#b58348', '#d2a368', '#a8783d', '#be8d52'];
+
+      for (let y = startY; y < endY; y += plankHeight) {
+        const colorIdx = Math.abs(Math.floor((y - startY) / plankHeight)) % plankColors.length;
+        ctx.fillStyle = plankColors[colorIdx];
+        ctx.fillRect(baseCenter.x - baseRadius, y, baseRadius * 2, plankHeight - 2);
+
+        // Dark seam line between wood planks
+        ctx.fillStyle = '#6b4721';
+        ctx.fillRect(baseCenter.x - baseRadius, y + plankHeight - 2, baseRadius * 2, 2);
+
+        // Cute wood nail dots
+        ctx.fillStyle = '#4a3014';
+        for (let nx = baseCenter.x - baseRadius + 15; nx < baseCenter.x + baseRadius; nx += 42) {
+          ctx.beginPath();
+          ctx.arc(nx, y + 4, 1.5, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Warm glow around the base campfire onto the wooden floor
+      const grad = ctx.createRadialGradient(
+        baseCenter.x, baseCenter.y, 10,
+        baseCenter.x, baseCenter.y, baseRadius
+      );
+      grad.addColorStop(0, 'rgba(255, 177, 66, 0.45)');
+      grad.addColorStop(0.5, 'rgba(255, 204, 102, 0.2)');
+      grad.addColorStop(1, 'rgba(100, 60, 20, 0.15)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(baseCenter.x - baseRadius, baseCenter.y - baseRadius, baseRadius * 2, baseRadius * 2);
+      ctx.restore();
+
+      // Outer rim around the wooden deck
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(baseCenter.x, baseCenter.y, baseRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#5d4037';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
+
+      // 2. WOODEN PALISADE WALL: 100% COMPLETE UNBROKEN FULL CIRCLE OF WOODEN LOGS!
+      const numLogs = 48; // tightly spaced full circle, NO gaps!
+      const logRadius = 8;
+      const wallIntegrity = gameState.wallHp / gameState.maxWallHp;
+
+      for (let i = 0; i < numLogs; i++) {
+        // FULL CIRCLE: every single angle around the circle has a wooden log!
+        const angle = (i / numLogs) * Math.PI * 2;
+        const lx = baseCenter.x + Math.cos(angle) * baseRadius;
+        const ly = baseCenter.y + Math.sin(angle) * baseRadius;
+
+        // Darker tint if wall took heavy damage
+        const isDamaged = wallIntegrity < 0.35 && (i % 4 === 0);
+
+        // Wooden log cylinder top
+        ctx.save();
+        ctx.fillStyle = isDamaged ? '#5d4037' : '#8d6e63';
+        ctx.strokeStyle = '#4e342e';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(lx, ly, logRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // Inner wood rings
+        ctx.fillStyle = isDamaged ? '#6d4c41' : '#a1887f';
+        ctx.beginPath();
+        ctx.arc(lx, ly, logRadius * 0.65, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pointy spike shadow
+        ctx.fillStyle = '#3e2723';
+        ctx.beginPath();
+        ctx.arc(lx, ly, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Snow cap dusting on top of wooden log
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.beginPath();
+        ctx.arc(lx - 2, ly - 2, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Wooden wall health badge if damaged
+      if (gameState.wallHp < gameState.maxWallHp) {
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.roundRect(baseCenter.x - 45, baseCenter.y - baseRadius - 26, 90, 16, 8);
+        ctx.fill();
+        ctx.fillStyle = gameState.wallHp > 30 ? '#2ecc71' : '#e74c3c';
+        ctx.fillRect(baseCenter.x - 43, baseCenter.y - baseRadius - 24, 86 * (gameState.wallHp / gameState.maxWallHp), 12);
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 10px Comic Sans MS, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('WALL ' + Math.round(gameState.wallHp) + '%', baseCenter.x, baseCenter.y - baseRadius - 14);
+        ctx.restore();
+      }
+    }
+
+    /* --- Draw Animated Campfire --- */
+    function drawCampfire(x, y) {
+      ctx.save();
+      // Stone ring
+      for (let s = 0; s < 8; s++) {
+        const ang = (s / 8) * Math.PI * 2;
+        const sx = x + Math.cos(ang) * 22;
+        const sy = y + Math.sin(ang) * 22;
+        ctx.fillStyle = '#7f8c8d';
+        ctx.beginPath();
+        ctx.arc(sx, sy, 5.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // Campfire wooden logs (criss-crossed)
+      ctx.fillStyle = '#5d4037';
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(0.4);
+      ctx.fillRect(-18, -4, 36, 8);
+      ctx.rotate(-0.8);
+      ctx.fillRect(-18, -4, 36, 8);
+      ctx.restore();
+
+      // Flickering animated flames
+      const flameTime = Date.now() * 0.008;
+      const flicker1 = Math.sin(flameTime) * 3;
+      const flicker2 = Math.cos(flameTime * 1.5) * 4;
+
+      // Outer Red flame
+      ctx.fillStyle = '#e74c3c';
+      ctx.beginPath();
+      ctx.moveTo(x - 14, y + 4);
+      ctx.quadraticCurveTo(x - 18, y - 14, x + flicker1, y - 28);
+      ctx.quadraticCurveTo(x + 18, y - 14, x + 14, y + 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Middle Orange flame
+      ctx.fillStyle = '#f39c12';
+      ctx.beginPath();
+      ctx.moveTo(x - 10, y + 3);
+      ctx.quadraticCurveTo(x - 12, y - 10, x - flicker2, y - 22);
+      ctx.quadraticCurveTo(x + 12, y - 10, x + 10, y + 3);
+      ctx.closePath();
+      ctx.fill();
+
+      // Inner Yellow/White hot flame
+      ctx.fillStyle = '#ffeaa7';
+      ctx.beginPath();
+      ctx.moveTo(x - 6, y + 2);
+      ctx.quadraticCurveTo(x - 6, y - 6, x, y - 14 + flicker1 * 0.5);
+      ctx.quadraticCurveTo(x + 6, y - 6, x + 6, y + 2);
+      ctx.closePath();
+      ctx.fill();
+
+      // Sparks rising
+      if (Math.random() < 0.3) {
+        particles.push({
+          x: x + (Math.random() - 0.5) * 12,
+          y: y - 10,
+          vx: (Math.random() - 0.5) * 0.8,
+          vy: -1.2 - Math.random() * 1.5,
+          color: '#f1c40f',
+          radius: 1.5,
+          alpha: 0.9,
+          decay: 0.04
+        });
+      }
+
+      // Campfire Health Badge directly on the campfire
+      const cBarW = 60;
+      const cBarH = 7;
+      ctx.fillStyle = 'rgba(0,0,0,0.65)';
+      ctx.roundRect(x - cBarW / 2 - 1, y - 44, cBarW + 2, cBarH + 2, 4);
+      ctx.fill();
+      ctx.fillStyle = gameState.baseHp > 60 ? '#2ecc71' : '#e74c3c';
+      ctx.fillRect(x - cBarW / 2, y - 43, cBarW * (gameState.baseHp / gameState.maxBaseHp), cBarH);
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 9px Comic Sans MS, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('🔥 ' + Math.round((gameState.baseHp / gameState.maxBaseHp) * 100) + '%', x, y - 46);
+
+      ctx.restore();
+    }
+
+    /* --- Draw Polar Bear --- */
+    function drawPolarBear(b) {
+      ctx.save();
+      ctx.translate(b.x, b.y);
+
+      // Face direction of movement
+      const dirX = baseCenter.x - b.x;
+      if (dirX < 0) ctx.scale(-1, 1);
+
+      // Heavy slow waddle rocking motion
+      ctx.rotate(Math.sin(b.stepCycle) * 0.08);
+
+      // Hit Flash effect
+      const furColor = b.flashTime > 0 ? '#ff7675' : '#ffffff';
+      const shadowColor = b.flashTime > 0 ? '#d63031' : '#dfe6e9';
+
+      // Bear Body
+      const br = b.radius;
+      ctx.fillStyle = furColor;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, br * 0.95, br * 0.75, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = shadowColor;
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      // Little Bear Paws / Walking Feet
+      const legBob = Math.sin(b.stepCycle) * 3;
+      ctx.fillStyle = furColor;
+      // Front Paw
+      ctx.beginPath();
+      ctx.ellipse(br * 0.5, br * 0.5 + legBob, br * 0.25, br * 0.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      // Back Paw
+      ctx.beginPath();
+      ctx.ellipse(-br * 0.5, br * 0.5 - legBob, br * 0.25, br * 0.2, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Bear Head
+      ctx.beginPath();
+      ctx.arc(br * 0.65, -br * 0.2, br * 0.45, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Cute Round Ear
+      ctx.beginPath();
+      ctx.arc(br * 0.6, -br * 0.6, br * 0.18, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fab1a0'; // pink inner ear
+      ctx.beginPath();
+      ctx.arc(br * 0.6, -br * 0.6, br * 0.09, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Black Nose & Cute Eye
+      ctx.fillStyle = '#2d3436';
+      ctx.beginPath();
+      ctx.arc(br * 0.95, -br * 0.18, br * 0.1, 0, Math.PI * 2); // nose
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(br * 0.75, -br * 0.3, br * 0.08, 0, Math.PI * 2); // eye
+      ctx.fill();
+
+      // If BOSS: draw King Frosty Golden Ice Crown! 👑
+      if (b.isBoss) {
+        ctx.fillStyle = '#fdcb6e';
+        ctx.strokeStyle = '#e17055';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        const cx = br * 0.65;
+        const cy = -br * 0.75;
+        ctx.moveTo(cx - 12, cy);
+        ctx.lineTo(cx - 16, cy - 14);
+        ctx.lineTo(cx - 5, cy - 8);
+        ctx.lineTo(cx, cy - 16);
+        ctx.lineTo(cx + 5, cy - 8);
+        ctx.lineTo(cx + 16, cy - 14);
+        ctx.lineTo(cx + 12, cy);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Crown Jewels
+        ctx.fillStyle = '#0984e3';
+        ctx.beginPath();
+        ctx.arc(cx, cy - 10, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.restore();
+
+      // Health Bar above Bear
+      const barW = b.isBoss ? 56 : 34;
+      const barH = 5;
+      const barX = b.x - barW / 2;
+      const barY = b.y - b.radius - 12;
+
+      ctx.fillStyle = 'rgba(0,0,0,0.5)';
+      ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+      ctx.fillStyle = b.isBoss ? '#f39c12' : '#e74c3c';
+      ctx.fillRect(barX, barY, barW * (b.hp / b.maxHp), barH);
+    }
+
+    /* --- Draw Arrow --- */
+    function drawArrow(a) {
+      ctx.save();
+      ctx.translate(a.x, a.y);
+      ctx.rotate(a.angle);
+
+      // Shaft
+      ctx.strokeStyle = '#795548';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-16, 0);
+      ctx.lineTo(12, 0);
+      ctx.stroke();
+
+      // Arrowhead (silver / sparkling)
+      ctx.fillStyle = '#dfe6e9';
+      ctx.beginPath();
+      ctx.moveTo(12, -4);
+      ctx.lineTo(18, 0);
+      ctx.lineTo(12, 4);
+      ctx.closePath();
+      ctx.fill();
+
+      // Feathers
+      ctx.fillStyle = '#0984e3';
+      ctx.beginPath();
+      ctx.moveTo(-16, 0);
+      ctx.lineTo(-20, -5);
+      ctx.lineTo(-12, 0);
+      ctx.lineTo(-20, 5);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    /* --- Draw Hero Riding Horse & Wielding Weapon --- */
+    function drawHeroAndHorse() {
+      ctx.save();
+      ctx.translate(hero.x, hero.y);
+
+      // Invulnerability flash shield after taking a hit
+      if (hero.invulnerableTimer > 0) {
+        if (Math.floor(hero.invulnerableTimer / 4) % 2 === 0) {
+          ctx.globalAlpha = 0.55;
+        }
+      }
+
+      // Direction
+      if (!hero.facingRight) {
+        ctx.scale(-1, 1);
+      }
+
+      // Horse Gallop Bobbing
+      const bob = hero.isMoving ? Math.sin(hero.gallopCycle) * 3 : 0;
+      const legAngle = hero.isMoving ? Math.sin(hero.gallopCycle) * 0.4 : 0;
+
+      // Color Palette for Horse (Golden vs Pink)
+      let horseBody = loadout.horse === 'golden' ? '#f1c40f' : '#ff9ff3';
+      let horseMane = loadout.horse === 'golden' ? '#f39c12' : '#e056fd';
+      let horseSaddle = loadout.horse === 'golden' ? '#8e44ad' : '#3742fa';
+      let hoofColor = '#2c3e50';
+
+      // 1. HORSE LEGS (Back pair & Front pair)
+      ctx.fillStyle = horseBody;
+      ctx.strokeStyle = '#d63031';
+      ctx.lineWidth = 1.5;
+
+      // Back legs
+      ctx.save();
+      ctx.translate(-16, 12);
+      ctx.rotate(-legAngle);
+      ctx.fillRect(-3, 0, 7, 16);
+      ctx.fillStyle = hoofColor;
+      ctx.fillRect(-3, 14, 7, 5); // hoof
+      ctx.restore();
+
+      // Front legs
+      ctx.save();
+      ctx.fillStyle = horseBody;
+      ctx.translate(14, 12);
+      ctx.rotate(legAngle);
+      ctx.fillRect(-3, 0, 7, 16);
+      ctx.fillStyle = hoofColor;
+      ctx.fillRect(-3, 14, 7, 5); // hoof
+      ctx.restore();
+
+      // 2. HORSE BODY
+      ctx.fillStyle = horseBody;
+      ctx.beginPath();
+      ctx.ellipse(0, 4 + bob, 22, 14, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+      ctx.stroke();
+
+      // Swishing Tail
+      const tailAngle = Math.cos(hero.gallopCycle * 0.8) * 0.3;
+      ctx.save();
+      ctx.translate(-22, 0 + bob);
+      ctx.rotate(tailAngle);
+      ctx.fillStyle = horseMane;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(-14, 10, -8, 20);
+      ctx.quadraticCurveTo(-4, 10, 0, 0);
+      ctx.fill();
+      ctx.restore();
+
+      // 3. HORSE NECK & HEAD
+      ctx.fillStyle = horseBody;
+      ctx.beginPath();
+      ctx.moveTo(8, -2 + bob);
+      ctx.lineTo(20, -18 + bob);
+      ctx.lineTo(28, -12 + bob);
+      ctx.lineTo(16, 6 + bob);
+      ctx.closePath();
+      ctx.fill();
+
+      // Horse Head
+      ctx.beginPath();
+      ctx.ellipse(22, -18 + bob, 10, 7, 0.4, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Horse Mane
+      ctx.fillStyle = horseMane;
+      ctx.beginPath();
+      ctx.moveTo(10, -2 + bob);
+      ctx.lineTo(18, -22 + bob);
+      ctx.lineTo(14, -20 + bob);
+      ctx.lineTo(8, -10 + bob);
+      ctx.closePath();
+      ctx.fill();
+
+      // Horse Ear
+      ctx.fillStyle = horseBody;
+      ctx.beginPath();
+      ctx.moveTo(18, -24 + bob);
+      ctx.lineTo(21, -30 + bob);
+      ctx.lineTo(23, -24 + bob);
+      ctx.closePath();
+      ctx.fill();
+
+      // Horse Eye & Bridle
+      ctx.fillStyle = '#2c3e50';
+      ctx.beginPath();
+      ctx.arc(24, -19 + bob, 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 4. SADDLE
+      ctx.fillStyle = horseSaddle;
+      ctx.beginPath();
+      ctx.roundRect(-8, -4 + bob, 16, 10, 4);
+      ctx.fill();
+      ctx.fillStyle = '#fdcb6e'; // gold saddle trim
+      ctx.fillRect(-6, 4 + bob, 12, 2);
+
+      // 5. RIDER (BOY OR GIRL FIGHTER)
+      const riderY = -12 + bob;
+
+      // Hero Tunic / Armor
+      const armorColor = loadout.fighter === 'boy' ? '#0984e3' : '#e84393';
+      ctx.fillStyle = armorColor;
+      ctx.beginPath();
+      ctx.roundRect(-7, riderY, 14, 14, 4);
+      ctx.fill();
+
+      // Silver chestplate / belt
+      ctx.fillStyle = '#dfe6e9';
+      ctx.fillRect(-5, riderY + 4, 10, 4);
+      ctx.fillStyle = '#f1c40f';
+      ctx.fillRect(-2, riderY + 4, 4, 4); // gold buckle
+
+      // Hero Head
+      ctx.fillStyle = '#ffeaa7'; // skin tone
+      ctx.beginPath();
+      ctx.arc(0, riderY - 7, 8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Hero Hair / Helmet
+      if (loadout.fighter === 'boy') {
+        // Knight hair / crown
+        ctx.fillStyle = '#6c5ce7'; // valiant purple knight cap
+        ctx.beginPath();
+        ctx.arc(0, riderY - 10, 8, Math.PI, Math.PI * 2);
+        ctx.fill();
+        // Brown bangs
+        ctx.fillStyle = '#4a2810';
+        ctx.beginPath();
+        ctx.arc(-2, riderY - 9, 4, 0, Math.PI);
+        ctx.fill();
+      } else {
+        // Girl Fighter hair: stylish ponytail & golden ribbon
+        ctx.fillStyle = '#d63031'; // brown/crimson hair
+        ctx.beginPath();
+        ctx.arc(0, riderY - 9, 8, Math.PI * 0.8, Math.PI * 2.2);
+        ctx.fill();
+
+        // Ponytail behind
+        ctx.fillStyle = '#d63031';
+        ctx.beginPath();
+        ctx.ellipse(-9, riderY - 10, 6, 9, 0.4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#fdcb6e'; // gold hair tie
+        ctx.beginPath();
+        ctx.arc(-6, riderY - 10, 3, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Friendly Hero Smile & Eye
+      ctx.fillStyle = '#2d3436';
+      ctx.beginPath();
+      ctx.arc(3, riderY - 8, 1.5, 0, Math.PI * 2); // eye
+      ctx.fill();
+      ctx.strokeStyle = '#2d3436';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.arc(3, riderY - 5, 2.5, 0, Math.PI); // smile
+      ctx.stroke();
+
+      // 6. WEAPON (SWORD OR BOW)
+      if (loadout.weapon === 'sword') {
+        // Knight's Sword
+        ctx.save();
+        ctx.translate(6, riderY + 4);
+
+        if (hero.slashAnimation > 0) {
+          // Swinging sword slash
+          ctx.rotate(0.6 - (hero.slashAnimation / 12) * 1.6);
+        } else {
+          ctx.rotate(0.3);
+        }
+
+        // Sword Blade (gleaming steel)
+        ctx.fillStyle = '#dfe6e9';
+        ctx.fillRect(0, -22, 5, 22);
+        // Pointy tip
+        ctx.beginPath();
+        ctx.moveTo(0, -22);
+        ctx.lineTo(2.5, -27);
+        ctx.lineTo(5, -22);
+        ctx.closePath();
+        ctx.fill();
+
+        // Crossguard & Hilt
+        ctx.fillStyle = '#f1c40f'; // golden guard
+        ctx.fillRect(-4, 0, 13, 3);
+        ctx.fillStyle = '#795548'; // handle
+        ctx.fillRect(1, 3, 3, 6);
+        ctx.fillStyle = '#f1c40f'; // pommel
+        ctx.beginPath();
+        ctx.arc(2.5, 10, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+
+        // Visual Slash Arc Effect
+        if (hero.slashAnimation > 0) {
+          ctx.save();
+          const slashProgress = 1 - (hero.slashAnimation / 12);
+          ctx.strokeStyle = 'rgba(255, 234, 167, 0.85)';
+          ctx.lineWidth = 6;
+          ctx.beginPath();
+          ctx.arc(12, riderY, 46, -Math.PI / 4, Math.PI / 3);
+          ctx.stroke();
+
+          ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.arc(12, riderY, 46, -Math.PI / 5, Math.PI / 3.5);
+          ctx.stroke();
+          ctx.restore();
+        }
+      } else {
+        // Ranger's Bow
+        ctx.save();
+        ctx.translate(10, riderY + 2);
+        ctx.strokeStyle = '#8d6e63';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(0, 0, 16, -Math.PI / 2.5, Math.PI / 2.5);
+        ctx.stroke();
+
+        // Bowstring
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(8, -14);
+        ctx.lineTo(8, 14);
+        ctx.stroke();
+
+        ctx.restore();
+      }
+
+      ctx.restore();
+    }
+
+    /* =========================================================================
+       ANIMATION LOOP
+       ========================================================================= */
+    function loop() {
+      update();
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    // Start loop
+    updatePreviewSummary();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>
