@@ -558,6 +558,17 @@
       text-shadow: 0 0 10px rgba(255, 159, 243, 0.6);
     }
 
+    /* Dynamic Popups Container */
+    #popupContainer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 80;
+    }
+
     /* 5-Points Clapping Celebration Banner */
     .clap-banner {
       position: absolute;
@@ -648,6 +659,57 @@
       height: 100%;
       pointer-events: none;
       z-index: 150;
+    }
+
+    /* Device Mode Switcher (PC Mouse vs Phone Turbo) */
+    .device-mode-box {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      margin: 10px 0 8px;
+      background: rgba(255, 255, 255, 0.08);
+      padding: 5px;
+      border-radius: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+    }
+
+    .device-mode-btn {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #ced6e0;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 800;
+      padding: 10px 14px;
+      border-radius: 40px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .device-mode-btn.active {
+      background: linear-gradient(135deg, #00d2d3, #0984e3);
+      color: #ffffff;
+      box-shadow: 0 4px 15px rgba(0, 210, 211, 0.45);
+      border: 1px solid #70a1ff;
+    }
+
+    .device-mode-btn:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.14);
+      color: #ffffff;
+    }
+
+    .mode-desc-note {
+      font-size: 0.88rem;
+      color: #feca57;
+      margin-bottom: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+      text-align: center;
     }
 
     /* Mobile Phone & iPad Optimizations */
@@ -751,6 +813,7 @@
     <div id="circleContainer"></div>
 
     <!-- Dynamic Popups (Clap Banner & Speed Alerts) -->
+    <div id="popupContainer"></div>
   </div>
 
   <!-- START SCREEN MODAL - Fixed over screen, big Play button immediately visible! -->
@@ -758,9 +821,22 @@
     <div class="modal-card">
       <span class="modal-badge">Project #3 • Level 1</span>
       <h1 class="modal-title" style="margin-bottom: 6px;">🪐 Solar Pop!</h1>
-      <p class="modal-desc" style="margin-bottom: 14px; font-size: 1.05rem;">
+      <p class="modal-desc" style="margin-bottom: 10px; font-size: 1rem;">
         Pop the space circles before time runs out!
       </p>
+
+      <!-- DEVICE MODE SELECTOR (PC Mouse vs Phone Turbo) -->
+      <div class="device-mode-box">
+        <button class="device-mode-btn active" id="btnModePc" type="button">
+          💻 PC Mouse
+        </button>
+        <button class="device-mode-btn" id="btnModeMobile" type="button">
+          📱 Phone Turbo ⚡
+        </button>
+      </div>
+      <div class="mode-desc-note" id="modeDescNote">
+        💻 PC Mode: Gentle start, larger circles, balanced for mouse aim!
+      </div>
 
       <!-- BIG GLOWING PLAY BUTTON - 100% VISIBLE ON FIRST GLANCE WITHOUT SCROLLING -->
       <button class="btn-play" id="startBtn" style="width: 100%; justify-content: center; margin-bottom: 16px; font-size: 1.45rem; padding: 16px 24px; box-shadow: 0 0 35px rgba(46, 213, 115, 0.7);">
@@ -1321,13 +1397,51 @@
     let isPlaying = false;
     let currentSpeedMode = 'slow'; // 'slow', 'medium', 'fast'
 
-    // Size cycle: 0 -> Big, 1 -> Small, 2 -> Medium
+    // Size cycle step
     let sizeCycleStep = 0;
-    const sizeProfiles = [
-      { name: 'BIG', size: 130, emojiSize: '2.4rem', tag: '🐘 BIG' },
-      { name: 'SMALL', size: 52, emojiSize: '1.2rem', tag: '🐜 SMALL' },
-      { name: 'MEDIUM', size: 88, emojiSize: '1.7rem', tag: '🦊 MEDIUM' }
-    ];
+
+    /* =========================================================================
+       DEVICE MODES & DIFFICULTY BALANCING (Kokia's Discovery!)
+       - PC Mouse Mode: gentle start, larger circles, +1s bonus for mouse travel
+       - Phone Turbo Mode: fast start, supersonic speed, smaller circles, +0.4s bonus
+       ========================================================================= */
+    const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.innerWidth < 768);
+    let selectedMode = isTouchDevice ? 'mobile' : 'pc';
+
+    const GAME_MODES = {
+      pc: {
+        name: 'PC Mouse Mode',
+        tag: '💻 PC',
+        initialTime: 30,
+        timeBonus: 1.0,
+        timeBonusLabel: '+1s ⏱️',
+        baseSpeed: 0.20,
+        speedPerClick: 0.18,
+        maxSpeed: 5.5,
+        sizes: [
+          { name: 'BIG', size: 130, emojiSize: '2.4rem', tag: '🐘 BIG' },
+          { name: 'SMALL', size: 52, emojiSize: '1.2rem', tag: '🐜 SMALL' },
+          { name: 'MEDIUM', size: 88, emojiSize: '1.7rem', tag: '🦊 MEDIUM' }
+        ],
+        desc: '💻 PC Mode: Gentle start, big circles, balanced for mouse aim!'
+      },
+      mobile: {
+        name: 'Phone Turbo Mode',
+        tag: '📱 TURBO',
+        initialTime: 25,
+        timeBonus: 0.4,
+        timeBonusLabel: '+0.4s ⚡',
+        baseSpeed: 2.2, // Starts fast and energetic!
+        speedPerClick: 0.45, // Scales up fast on every tap!
+        maxSpeed: 10.0, // Supersonic speed!
+        sizes: [
+          { name: 'MEDIUM', size: 66, emojiSize: '1.4rem', tag: '🦊 FAST' },
+          { name: 'SMALL', size: 44, emojiSize: '1.0rem', tag: '🐜 TINY' },
+          { name: 'NINJA', size: 32, emojiSize: '0.75rem', tag: '⚡ NINJA' }
+        ],
+        desc: '📱 Phone Turbo: Starts FAST, smaller circles, supersonic speed ramp!'
+      }
+    };
 
     // Current active circle physics object
     let activeCircle = null;
@@ -1348,6 +1462,43 @@
     const finalScoreValEl = document.getElementById('finalScoreVal');
     const rankBadgeEl = document.getElementById('rankBadge');
     const summaryFeedbackEl = document.getElementById('summaryFeedback');
+    const btnModePc = document.getElementById('btnModePc');
+    const btnModeMobile = document.getElementById('btnModeMobile');
+    const modeDescNote = document.getElementById('modeDescNote');
+
+    function updateModeUI() {
+      if (!btnModePc || !btnModeMobile || !modeDescNote) return;
+      if (selectedMode === 'mobile') {
+        btnModeMobile.classList.add('active');
+        btnModePc.classList.remove('active');
+        modeDescNote.textContent = GAME_MODES.mobile.desc;
+        modeDescNote.style.color = '#ff9ff3';
+      } else {
+        btnModePc.classList.add('active');
+        btnModeMobile.classList.remove('active');
+        modeDescNote.textContent = GAME_MODES.pc.desc;
+        modeDescNote.style.color = '#feca57';
+      }
+      if (!isPlaying && timerValueEl) {
+        timerValueEl.textContent = `${GAME_MODES[selectedMode].initialTime}s`;
+      }
+    }
+
+    if (btnModePc && btnModeMobile) {
+      btnModePc.addEventListener('click', () => {
+        initAudio();
+        selectedMode = 'pc';
+        updateModeUI();
+        playTone(440, 'triangle', 0.1);
+      });
+
+      btnModeMobile.addEventListener('click', () => {
+        initAudio();
+        selectedMode = 'mobile';
+        updateModeUI();
+        playTone(660, 'triangle', 0.1);
+      });
+    }
 
     // Vibrant themes for circles
     const circleThemes = [
@@ -1365,55 +1516,78 @@
        POPUP ANNOUNCEMENTS (Clapping at 5 points & Speed Alerts)
        ========================================================================= */
     function showClapBanner(pts) {
-      const banner = document.createElement('div');
-      banner.className = 'clap-banner';
-      banner.innerHTML = `👏 ${pts} POINTS! CLAP CLAP CLAP! 👏`;
-      popupContainer.appendChild(banner);
-      setTimeout(() => { banner.remove(); }, 1400);
+      const container = document.getElementById('popupContainer') || gameArea;
+      if (!container) return;
+      try {
+        const banner = document.createElement('div');
+        banner.className = 'clap-banner';
+        banner.innerHTML = `👏 ${pts} POINTS! CLAP CLAP CLAP! 👏`;
+        container.appendChild(banner);
+        setTimeout(() => { banner.remove(); }, 1400);
+      } catch (err) {
+        console.error('showClapBanner error:', err);
+      }
     }
 
     function showSpeedAlert(title, color) {
-      const alert = document.createElement('div');
-      alert.className = 'speed-alert';
-      alert.style.setProperty('--alert-color', color);
-      alert.innerHTML = title;
-      popupContainer.appendChild(alert);
-      setTimeout(() => { alert.remove(); }, 1200);
+      const container = document.getElementById('popupContainer') || gameArea;
+      if (!container) return;
+      try {
+        const alert = document.createElement('div');
+        alert.className = 'speed-alert';
+        alert.style.setProperty('--alert-color', color);
+        alert.innerHTML = title;
+        container.appendChild(alert);
+        setTimeout(() => { alert.remove(); }, 1200);
+      } catch (err) {
+        console.error('showSpeedAlert error:', err);
+      }
     }
 
     /* =========================================================================
        SPEED PROGRESSION CALCULATOR (Kokia's Playtested Rule)
-       - Starts SUPER SLOW (0.20 px/frame) so Kokia can easily click circle 1!
-       - Increases smoothly on EVERY SINGLE CLICK!
+       - In PC Mode: Starts at 0.20, increases +0.18 per click
+       - In Phone Mode: Starts at 2.2, increases +0.45 per click to reach 10.0!
        ========================================================================= */
     function getSpeedForScore(currentScore) {
-      // Starts super slow at 0.20, increases by +0.18 on every click
-      const baseSpeed = 0.20;
-      const speedPerClick = 0.18;
-      const speed = Math.min(baseSpeed + (currentScore * speedPerClick), 5.5);
+      const modeConfig = GAME_MODES[selectedMode];
+      const speed = Math.min(modeConfig.baseSpeed + (currentScore * modeConfig.speedPerClick), modeConfig.maxSpeed);
 
       let label = '';
-      let mode = 'slow';
+      let modeStyle = 'slow';
       const level = currentScore + 1;
 
-      if (speed < 0.75) {
-        mode = 'slow';
-        label = `🟢 Level ${level}: Super Slow 🐢`;
-      } else if (speed < 1.35) {
-        mode = 'slow';
-        label = `🟢 Level ${level}: Easy Float 🎈`;
-      } else if (speed < 2.1) {
-        mode = 'medium';
-        label = `🟡 Level ${level}: Medium 🏃`;
-      } else if (speed < 3.2) {
-        mode = 'medium';
-        label = `🟡 Level ${level}: Medium Fast ⚡`;
+      if (selectedMode === 'mobile') {
+        if (speed < 4.0) {
+          modeStyle = 'medium';
+          label = `⚡ Lvl ${level}: Turbo 📱`;
+        } else if (speed < 7.0) {
+          modeStyle = 'medium';
+          label = `🔥 Lvl ${level}: Supersonic! 🚀`;
+        } else {
+          modeStyle = 'fast';
+          label = `💥 Lvl ${level}: HYPER SPEED! ⚡`;
+        }
       } else {
-        mode = 'fast';
-        label = `🔴 Level ${level}: ROCKET FAST! 🚀`;
+        if (speed < 0.75) {
+          modeStyle = 'slow';
+          label = `🟢 Lvl ${level}: Super Slow 🐢`;
+        } else if (speed < 1.35) {
+          modeStyle = 'slow';
+          label = `🟢 Lvl ${level}: Easy Float 🎈`;
+        } else if (speed < 2.1) {
+          modeStyle = 'medium';
+          label = `🟡 Lvl ${level}: Medium 🏃`;
+        } else if (speed < 3.2) {
+          modeStyle = 'medium';
+          label = `🟡 Lvl ${level}: Medium Fast ⚡`;
+        } else {
+          modeStyle = 'fast';
+          label = `🔴 Lvl ${level}: ROCKET FAST! 🚀`;
+        }
       }
 
-      return { speed, mode, label };
+      return { speed, mode: modeStyle, label };
     }
 
     /* =========================================================================
@@ -1430,9 +1604,11 @@
       // Increment total circles spawned in this match
       circlesPoppedTotal++;
 
-      // Pick Size profile: 0 Big -> 1 Small -> 2 Medium -> repeat
-      const profile = sizeProfiles[sizeCycleStep];
-      sizeCycleStep = (sizeCycleStep + 1) % sizeProfiles.length;
+      // Pick Size profile according to selectedMode (PC or Phone Turbo)
+      const modeConfig = GAME_MODES[selectedMode];
+      const profiles = modeConfig.sizes;
+      const profile = profiles[sizeCycleStep % profiles.length];
+      sizeCycleStep = (sizeCycleStep + 1) % profiles.length;
       const size = profile.size;
 
       // Pick Theme
@@ -1443,7 +1619,7 @@
       lastThemeIndex = themeIndex;
       const theme = circleThemes[themeIndex];
 
-      // Calculate speed based on current score (starts super slow, faster with each click!)
+      // Calculate speed based on current score (starts super slow on PC, fast on Mobile!)
       const speedConfig = getSpeedForScore(score);
 
       // Check if speed mode just leveled up!
@@ -1452,12 +1628,16 @@
         speedBadgeEl.className = currentSpeedMode;
         speedBadgeEl.textContent = speedConfig.label;
 
-        if (currentSpeedMode === 'medium') {
-          playSpeedUpSound(false);
-          showSpeedAlert('⚡ SPEED LEVEL UP: MEDIUM! 🏃', '#feca57');
-        } else if (currentSpeedMode === 'fast') {
-          playSpeedUpSound(true);
-          showSpeedAlert('🚀 SPEED LEVEL UP: ROCKET FAST! 🔴⚡', '#ff4757');
+        try {
+          if (currentSpeedMode === 'medium') {
+            playSpeedUpSound(false);
+            showSpeedAlert('⚡ SPEED LEVEL UP: MEDIUM! 🏃', '#feca57');
+          } else if (currentSpeedMode === 'fast') {
+            playSpeedUpSound(true);
+            showSpeedAlert('🚀 SPEED LEVEL UP: ROCKET FAST! 🔴⚡', '#ff4757');
+          }
+        } catch (err) {
+          console.error('Speed level up error:', err);
         }
       } else {
         speedBadgeEl.textContent = speedConfig.label;
@@ -1531,9 +1711,10 @@
         scoreValueEl.style.transform = 'scale(1.35)';
         setTimeout(() => { scoreValueEl.style.transform = 'scale(1)'; }, 150);
 
-        // KOKIA'S RULE #1: +1 SECOND EXTRA TIME ON EVERY CIRCLE! ⏱️✨
-        timeLeft += 1;
-        timerValueEl.textContent = `${timeLeft}s`;
+        // TIME BONUS (Adaptive to mode: +1.0s on PC for mouse travel, +0.4s on Phone Turbo!)
+        const modeConfig = GAME_MODES[selectedMode];
+        timeLeft = Math.round((timeLeft + modeConfig.timeBonus) * 10) / 10;
+        timerValueEl.textContent = `${Math.ceil(timeLeft)}s`;
 
         // Pulse timer in green
         timerValueEl.style.transform = 'scale(1.3)';
@@ -1549,12 +1730,12 @@
           }
         }, 220);
 
-        // Floating "+1s ⏱️" text
+        // Floating time bonus text (+1s ⏱️ on PC, +0.4s ⚡ on Phone)
         const timeBonusEl = document.createElement('div');
         timeBonusEl.className = 'floating-time-bonus';
         timeBonusEl.style.left = `${activeCircle.x + 35}px`;
         timeBonusEl.style.top = `${activeCircle.y - 25}px`;
-        timeBonusEl.innerHTML = `+1s ⏱️`;
+        timeBonusEl.innerHTML = modeConfig.timeBonusLabel;
         gameArea.appendChild(timeBonusEl);
         setTimeout(() => { timeBonusEl.remove(); }, 750);
 
@@ -1575,8 +1756,12 @@
 
         // RULE #2: CLAPPING SOUND WHENEVER WE GET 5 POINTS! 👏
         if (score > 0 && score % 5 === 0) {
-          playClappingSound();
-          showClapBanner(score);
+          try {
+            playClappingSound();
+            showClapBanner(score);
+          } catch (err) {
+            console.error('Clap celebration error:', err);
+          }
         }
 
         // Remove clicked circle
@@ -1601,22 +1786,38 @@
       activeCircle.x += activeCircle.vx;
       activeCircle.y += activeCircle.vy;
 
+      let bounced = false;
+
       // Bounce horizontally
       if (activeCircle.x <= activeCircle.minX) {
         activeCircle.x = activeCircle.minX;
         activeCircle.vx = Math.abs(activeCircle.vx);
+        bounced = true;
       } else if (activeCircle.x >= activeCircle.maxX) {
         activeCircle.x = activeCircle.maxX;
         activeCircle.vx = -Math.abs(activeCircle.vx);
+        bounced = true;
       }
 
       // Bounce vertically
       if (activeCircle.y <= activeCircle.minY) {
         activeCircle.y = activeCircle.minY;
         activeCircle.vy = Math.abs(activeCircle.vy);
+        bounced = true;
       } else if (activeCircle.y >= activeCircle.maxY) {
         activeCircle.y = activeCircle.maxY;
         activeCircle.vy = -Math.abs(activeCircle.vy);
+        bounced = true;
+      }
+
+      // On Phone Turbo mode, add slight angle deflect on bounce to keep high energy!
+      if (bounced && selectedMode === 'mobile') {
+        const curSpeed = Math.hypot(activeCircle.vx, activeCircle.vy);
+        const curAngle = Math.atan2(activeCircle.vy, activeCircle.vx);
+        const deflection = (Math.random() - 0.5) * 0.7; // ~20 deg variance
+        const newAngle = curAngle + deflection;
+        activeCircle.vx = Math.cos(newAngle) * curSpeed;
+        activeCircle.vy = Math.sin(newAngle) * curSpeed;
       }
 
       activeCircle.el.style.left = `${activeCircle.x}px`;
@@ -1655,18 +1856,22 @@
       initAudio();
       stopConfetti();
 
+      const modeConfig = GAME_MODES[selectedMode];
       isPlaying = true;
       score = 0;
       streak = 0;
       circlesPoppedTotal = 0;
       sizeCycleStep = 0;
-      currentSpeedMode = 'slow';
-      timeLeft = GAME_DURATION;
+      timeLeft = modeConfig.initialTime;
 
       scoreValueEl.textContent = '0';
       streakValueEl.textContent = '0';
-      speedBadgeEl.className = 'slow';
-      speedBadgeEl.textContent = '🟢 Slow 🐢';
+
+      const initialSpeed = getSpeedForScore(0);
+      currentSpeedMode = initialSpeed.mode;
+      speedBadgeEl.className = initialSpeed.mode;
+      speedBadgeEl.textContent = initialSpeed.label;
+
       timerValueEl.textContent = `${timeLeft}s`;
       timerValueEl.className = 'hud-value';
 
@@ -1678,17 +1883,17 @@
       // Spawn first circle
       spawnNextCircle();
 
-      // Start 30s countdown loop
+      // Start countdown loop
       clearInterval(gameTimer);
       gameTimer = setInterval(() => {
-        timeLeft--;
-        timerValueEl.textContent = `${timeLeft}s`;
+        timeLeft = Math.max(0, Math.round((timeLeft - 1) * 10) / 10);
+        timerValueEl.textContent = `${Math.ceil(timeLeft)}s`;
 
         // Urgent sound & styles in the final seconds
         if (timeLeft <= 5 && timeLeft > 0) {
           timerValueEl.className = 'hud-value danger';
           playClockTick(true);
-        } else if (timeLeft <= 10) {
+        } else if (timeLeft <= 10 && timeLeft > 0) {
           timerValueEl.className = 'hud-value hurry';
           playClockTick(false);
         }
@@ -1826,6 +2031,7 @@
     playAgainBtn.addEventListener('click', startGame);
 
     // Initial setup
+    updateModeUI();
     resizeCanvases();
     initStars();
     renderSolarSystem();

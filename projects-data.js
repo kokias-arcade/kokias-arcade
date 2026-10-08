@@ -89,7 +89,7 @@ window.KOKIA_PROJECTS = [
     emoji: "🪐",
     color: "#00d2d3",
     folder: "projects/03-circle-pop/index.html",
-    description: "Zoom through space as the Sun, Moon, and 8 planets turn around! Catch circles that give +1s extra time, change sizes, accelerate with each click, cheer with clapping, and reveal a cute surprise Gummy Bear face at game over!",
+    description: "Zoom through space as the Sun, Moon, and 8 planets turn around! Features dual device modes (💻 PC Mouse vs 📱 Phone Turbo), extra bonus time, size-cycling circles, clapping cheers, and a cute surprise Gummy Bear face at game over!",
     howItWasBuilt: [
       {
         step: 1,
@@ -114,7 +114,12 @@ window.KOKIA_PROJECTS = [
       {
         step: 5,
         title: "+1s Extra Time & The Surprise Gummy Bear! ⏱️🐻🍬",
-        text: "Kokia added two genius features: every circle you pop adds +1 second extra time to the clock, and when the game finishes, a shiny, colorful candy Gummy Bear face smiles and celebrates your score!"
+        text: "Kokia added two genius features: every circle you pop adds extra time to the clock, and when the game finishes, a shiny, colorful candy Gummy Bear face smiles and celebrates your score!"
+      },
+      {
+        step: 6,
+        title: "Kokia's Cross-Platform Balance (PC vs Phone Turbo!) 💻📱⚡",
+        text: "Kokia discovered during playtesting that tapping on a phone screen was way too easy compared to aiming with a mouse! So we engineered dual modes: PC Mouse Mode (gentle start, larger circles, +1s bonus) and Phone Turbo Mode (starts fast, ninja-small targets, snappy +0.4s bonus, and supersonic hyper speed up to 10.0)!"
       }
     ]
   }
