@@ -1786,38 +1786,45 @@
       activeCircle.x += activeCircle.vx;
       activeCircle.y += activeCircle.vy;
 
-      let bounced = false;
+      let bouncedX = false;
+      let bouncedY = false;
 
       // Bounce horizontally
       if (activeCircle.x <= activeCircle.minX) {
         activeCircle.x = activeCircle.minX;
         activeCircle.vx = Math.abs(activeCircle.vx);
-        bounced = true;
+        bouncedX = true;
       } else if (activeCircle.x >= activeCircle.maxX) {
         activeCircle.x = activeCircle.maxX;
         activeCircle.vx = -Math.abs(activeCircle.vx);
-        bounced = true;
+        bouncedX = true;
       }
 
       // Bounce vertically
       if (activeCircle.y <= activeCircle.minY) {
         activeCircle.y = activeCircle.minY;
         activeCircle.vy = Math.abs(activeCircle.vy);
-        bounced = true;
+        bouncedY = true;
       } else if (activeCircle.y >= activeCircle.maxY) {
         activeCircle.y = activeCircle.maxY;
         activeCircle.vy = -Math.abs(activeCircle.vy);
-        bounced = true;
+        bouncedY = true;
       }
 
-      // On Phone Turbo mode, add slight angle deflect on bounce to keep high energy!
-      if (bounced && selectedMode === 'mobile') {
-        const curSpeed = Math.hypot(activeCircle.vx, activeCircle.vy);
-        const curAngle = Math.atan2(activeCircle.vy, activeCircle.vx);
-        const deflection = (Math.random() - 0.5) * 0.7; // ~20 deg variance
-        const newAngle = curAngle + deflection;
-        activeCircle.vx = Math.cos(newAngle) * curSpeed;
-        activeCircle.vy = Math.sin(newAngle) * curSpeed;
+      // On Phone Turbo mode, add slight angle deflect on bounce without reversing into walls!
+      if ((bouncedX || bouncedY) && selectedMode === 'mobile') {
+        if (bouncedX) {
+          activeCircle.vy += (Math.random() - 0.5) * 1.5;
+        }
+        if (bouncedY) {
+          activeCircle.vx += (Math.random() - 0.5) * 1.5;
+        }
+        const curSpd = Math.hypot(activeCircle.vx, activeCircle.vy);
+        const targetSpd = getSpeedForScore(score).speed;
+        if (curSpd > 0) {
+          activeCircle.vx = (activeCircle.vx / curSpd) * targetSpd;
+          activeCircle.vy = (activeCircle.vy / curSpd) * targetSpd;
+        }
       }
 
       activeCircle.el.style.left = `${activeCircle.x}px`;
