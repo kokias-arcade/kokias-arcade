@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>🪓 Kokia's Snowy Woodcutter & Base</title>
   <!-- Google Fonts for arcade typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -192,12 +192,18 @@
     .modal-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0,0,0,0.6);
+      width: 100vw; height: 100vh; height: 100dvh;
+      background: rgba(0,0,0,0.7);
       display: none;
       align-items: center;
       justify-content: center;
-      z-index: 100;
-      backdrop-filter: blur(4px);
+      z-index: 1000;
+      backdrop-filter: blur(6px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      padding: 16px;
+      box-sizing: border-box;
     }
     .modal-overlay.active {
       display: flex;
@@ -205,15 +211,21 @@
 
     .shop-card {
       background: white;
-      width: 92%;
+      width: 100%;
       max-width: 520px;
       border-radius: 28px;
-      padding: 24px;
+      padding: 22px 24px;
       box-shadow: 0 20px 40px rgba(0,0,0,0.3);
       border: 5px solid #0984e3;
       position: relative;
       text-align: center;
+      margin: auto;
+      max-height: 90vh;
+      max-height: 90dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       animation: popIn 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-sizing: border-box;
     }
 
     @keyframes popIn {

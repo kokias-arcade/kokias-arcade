@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>🪐 Kokia's Solar Circle Pop! (30s Challenge)</title>
   <!-- Google Fonts for arcade typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -287,39 +287,52 @@
       to { transform: rotate(360deg); }
     }
 
-    /* Screen overlays (Start Screen & Game Over Screen) */
+    /* Screen overlays (Start Screen & Game Over Screen) - Fixed over entire phone screen */
     .screen-overlay {
-      position: absolute;
+      position: fixed;
       top: 0;
       left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.88);
+      right: 0;
+      bottom: 0;
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      background: rgba(6, 6, 14, 0.94);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      z-index: 100;
-      padding: 20px;
+      z-index: 1000;
+      padding: 16px;
       text-align: center;
-      backdrop-filter: blur(6px);
+      backdrop-filter: blur(8px);
       transition: opacity 0.3s ease;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      box-sizing: border-box;
     }
 
     .screen-overlay.hidden {
-      display: none;
+      display: none !important;
     }
 
     .modal-card {
       background: #141420;
       border: 3px solid #ff4757;
-      border-radius: 30px;
-      padding: 30px 36px;
-      max-width: 600px;
-      width: 95%;
+      border-radius: 28px;
+      padding: 24px 22px;
+      max-width: 520px;
+      width: 100%;
       box-shadow: 0 0 50px rgba(255, 71, 87, 0.35), 0 20px 40px rgba(0,0,0,0.8);
       position: relative;
       animation: popModal 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      margin: auto; /* Natural flexbox safe scrollable centering */
+      max-height: 90vh;
+      max-height: 90dvh;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      box-sizing: border-box;
     }
 
     @keyframes popModal {
@@ -738,84 +751,75 @@
     <div id="circleContainer"></div>
 
     <!-- Dynamic Popups (Clap Banner & Speed Alerts) -->
-    <div id="popupContainer"></div>
+  </div>
 
-    <!-- START SCREEN MODAL -->
-    <div class="screen-overlay" id="startScreen">
-      <div class="modal-card">
-        <span class="modal-badge">Project #3 • Level 1 Upgrade</span>
-        <h1 class="modal-title">🪐 Solar Circle Pop!</h1>
-        <p class="modal-desc">
-          Welcome to outer space, Kokia! The Sun, Moon, and all the planets are turning around in space!
-        </p>
+  <!-- START SCREEN MODAL - Fixed over screen, big Play button immediately visible! -->
+  <div class="screen-overlay" id="startScreen">
+    <div class="modal-card">
+      <span class="modal-badge">Project #3 • Level 1</span>
+      <h1 class="modal-title" style="margin-bottom: 6px;">🪐 Solar Pop!</h1>
+      <p class="modal-desc" style="margin-bottom: 14px; font-size: 1.05rem;">
+        Pop the space circles before time runs out!
+      </p>
 
-        <div class="instruction-steps">
-          <div class="step-item">
-            <span class="step-icon">☀️🪐</span>
-            <span>Watch the <strong>Sun & all 8 Planets + Moon</strong> turn in space!</span>
-          </div>
-          <div class="step-item">
-            <span class="step-icon">🔴🔵</span>
-            <span>Sizes change every turn: <strong>BIG, SMALL, and MEDIUM</strong>!</span>
-          </div>
-          <div class="step-item">
-            <span class="step-icon">🐢➡️🚀</span>
-            <span>Starts <strong>VERY SLOW</strong>, then gets <strong>faster with each click</strong>!</span>
-          </div>
-          <div class="step-item">
-            <span class="step-icon">👏</span>
-            <span>Listen for the <strong>CLAPPING CHEER</strong> every <strong>5 points</strong>!</span>
-          </div>
-          <div class="step-item">
-            <span class="step-icon">⏱️✨</span>
-            <span>Every circle gives you <strong>+1 SECOND EXTRA TIME</strong>!</span>
-          </div>
-          <div class="step-item">
-            <span class="step-icon">🐻🍬</span>
-            <span>When time runs out, see your surprise <strong>GUMMY BEAR FACE</strong>!</span>
-          </div>
+      <!-- BIG GLOWING PLAY BUTTON - 100% VISIBLE ON FIRST GLANCE WITHOUT SCROLLING -->
+      <button class="btn-play" id="startBtn" style="width: 100%; justify-content: center; margin-bottom: 16px; font-size: 1.45rem; padding: 16px 24px; box-shadow: 0 0 35px rgba(46, 213, 115, 0.7);">
+        ▶️ PRESS PLAY! 🚀
+      </button>
+
+      <div class="instruction-steps" style="margin-bottom: 0; padding: 12px 14px; gap: 8px;">
+        <div class="step-item" style="font-size: 0.95rem;">
+          <span class="step-icon">☀️🪐</span>
+          <span>Watch the <strong>Sun & 8 Planets + Moon</strong> turn!</span>
         </div>
+        <div class="step-item" style="font-size: 0.95rem;">
+          <span class="step-icon">⏱️✨</span>
+          <span>Every hit adds <strong>+1 SECOND EXTRA TIME</strong>!</span>
+        </div>
+        <div class="step-item" style="font-size: 0.95rem;">
+          <span class="step-icon">👏</span>
+          <span>Listen for the <strong>CLAPPING CHEER</strong> every 5 points!</span>
+        </div>
+        <div class="step-item" style="font-size: 0.95rem;">
+          <span class="step-icon">🐻🍬</span>
+          <span>Surprise <strong>GUMMY BEAR</strong> when time is up!</span>
+        </div>
+      </div>
+    </div>
+  </div>
 
-        <button class="btn-play" id="startBtn">
-          ▶️ PRESS PLAY! 🚀
+  <!-- GAME OVER SCREEN MODAL -->
+  <div class="screen-overlay hidden" id="gameOverScreen">
+    <div class="modal-card" style="border-color: #00d2d3; box-shadow: 0 0 50px rgba(0, 210, 211, 0.35);">
+      <span class="modal-badge" style="background: #00d2d3; color: #14141e;">⏱️ TIME'S UP!</span>
+      
+      <!-- CUTE GUMMY BEAR FACE (Kokia's Request!) -->
+      <div class="gummy-bear-card">
+        <div id="gummyBearContainer"></div>
+        <div class="gummy-bear-title" id="gummyBearTitle">🐻 Gummy Bear Friend!</div>
+      </div>
+
+      <h1 class="modal-title" style="background: linear-gradient(135deg, #00d2d3, #2ed573, #feca57); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Incredible Clicks, Kokia!</h1>
+      
+      <div class="score-banner">
+        <div class="score-sub">Total Space Circles Popped:</div>
+        <div class="score-big" id="finalScoreVal">0</div>
+        <div class="badge-rank" id="rankBadge">⚡ Super Space Pilot!</div>
+      </div>
+
+      <p class="modal-desc" id="summaryFeedback">
+        You caught those zooming circles right by the Sun and planets!
+      </p>
+
+      <div class="gameover-buttons">
+        <button class="btn-play" id="playAgainBtn" style="width: 100%; justify-content: center;">
+          🔄 PLAY AGAIN! 🚀
         </button>
+        <a href="../../index.html" class="btn-secondary" style="width: 100%; justify-content: center; text-align: center; text-decoration: none; padding: 12px; border-radius: 50px;">
+          ⬅️ Back to Arcade
+        </a>
       </div>
     </div>
-
-    <!-- GAME OVER SCREEN MODAL -->
-    <div class="screen-overlay hidden" id="gameOverScreen">
-      <div class="modal-card" style="border-color: #00d2d3; box-shadow: 0 0 50px rgba(0, 210, 211, 0.35);">
-        <span class="modal-badge" style="background: #00d2d3; color: #14141e;">⏱️ TIME'S UP!</span>
-        
-        <!-- CUTE GUMMY BEAR FACE (Kokia's Request!) -->
-        <div class="gummy-bear-card">
-          <div id="gummyBearContainer"></div>
-          <div class="gummy-bear-title" id="gummyBearTitle">🐻 Gummy Bear Friend!</div>
-        </div>
-
-        <h1 class="modal-title" style="background: linear-gradient(135deg, #00d2d3, #2ed573, #feca57); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Incredible Clicks, Kokia!</h1>
-        
-        <div class="score-banner">
-          <div class="score-sub">Total Space Circles Popped:</div>
-          <div class="score-big" id="finalScoreVal">0</div>
-          <div class="badge-rank" id="rankBadge">⚡ Super Space Pilot!</div>
-        </div>
-
-        <p class="modal-desc" id="summaryFeedback">
-          You caught those zooming circles right by the Sun and planets!
-        </p>
-
-        <div class="gameover-buttons">
-          <button class="btn-play" id="playAgainBtn">
-            🔄 PLAY AGAIN! 🚀
-          </button>
-          <a href="../../index.html" class="btn-secondary">
-            ⬅️ Back to Arcade
-          </a>
-        </div>
-      </div>
-    </div>
-
   </div>
 
   <script>
